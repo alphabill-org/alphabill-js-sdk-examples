@@ -1,0 +1,22 @@
+{
+  "name": "@alphabill/alphabill-js-sdk-examples",
+  "version": "0.5.0",
+  "description": "Examples for Alphabill JS SDK",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint \"./**/*.mjs\"",
+    "lint:fix": "eslint \"./**/*.mjs\" --fix"
+  },
+  "dependencies": {
+    "@alphabill/alphabill-js-sdk": "0.5.0-rc.7096236",
+    "@noble/hashes": "^1.4.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/parser": "^7.16.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3"
+  }
+}
