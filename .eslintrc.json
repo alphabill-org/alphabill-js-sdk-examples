@@ -2,8 +2,7 @@
   "extends": [
     "eslint:recommended",
     "plugin:prettier/recommended",
-    "plugin:import/recommended",
-    "plugin:import/typescript"
+    "plugin:import/recommended"
   ],
   "parserOptions": {
     "ecmaVersion": 2022,
