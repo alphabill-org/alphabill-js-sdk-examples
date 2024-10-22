@@ -1,26 +1,25 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
-import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/PayToPublicKeyHashPredicate.js';
-import { TransactionOrderFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/TransactionOrderFactory.js';
-import { UnitType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitType.js';
+import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
-import { waitTransactionProof } from '../waitTransactionProof.mjs';
+import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
+import {
+  SplitBillTransactionRecordWithProof
+} from '@alphabill/alphabill-js-sdk/lib/money/transactions/SplitBillTransactionRecordWithProof.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
-const transactionOrderFactory = new TransactionOrderFactory(cborCodec, signingService);
 
 const client = createMoneyClient({
   transport: http(config.moneyPartitionUrl, new CborCodecNode()),
-  transactionOrderFactory: transactionOrderFactory,
 });
 
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
-const feeCreditRecordId = units.findLast((id) => id.type.toBase16() === UnitType.MONEY_PARTITION_FEE_CREDIT_RECORD);
-const unitId = units.findLast((id) => id.type.toBase16() === UnitType.MONEY_PARTITION_BILL_DATA);
+const feeCreditRecordId = units.findLast((id) => id.type.toBase16() === MoneyPartitionUnitType.FEE_CREDIT_RECORD);
+const unitId = units.findLast((id) => id.type.toBase16() === MoneyPartitionUnitType.BILL);
 const round = await client.getRoundNumber();
 
 /**
@@ -42,4 +41,4 @@ const splitBillHash = await client.splitBill(
     feeCreditRecordId,
   },
 );
-console.log((await waitTransactionProof(client, splitBillHash))?.toString());
+console.log((await client.waitTransactionProof(splitBillHash, SplitBillTransactionRecordWithProof))?.toString());

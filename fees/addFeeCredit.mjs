@@ -2,33 +2,33 @@ import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCo
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { SystemIdentifier } from '@alphabill/alphabill-js-sdk/lib/SystemIdentifier.js';
-import { FeeCreditRecordUnitIdFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/FeeCreditRecordUnitIdFactory.js';
-import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/PayToPublicKeyHashPredicate.js';
-import { TransactionOrderFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/TransactionOrderFactory.js';
-import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitIdWithType.js';
-import { UnitType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitType.js';
+import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
+import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 import config from '../config.js';
-import { waitTransactionProof } from '../waitTransactionProof.mjs';
+import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
+import {
+  TransferFeeCreditTransactionRecordWithProof
+} from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/TransferFeeCreditTransactionRecordWithProof.js';
+import {
+  AddFeeCreditTransactionRecordWithProof
+} from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/AddFeeCreditTransactionRecordWithProof.js';
+import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
+import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
-const transactionOrderFactory = new TransactionOrderFactory(cborCodec, signingService);
-const feeCreditRecordUnitIdFactory = new FeeCreditRecordUnitIdFactory();
 
 const moneyClient = createMoneyClient({
   transport: http(config.moneyPartitionUrl, cborCodec),
-  transactionOrderFactory: transactionOrderFactory,
-  feeCreditRecordUnitIdFactory: feeCreditRecordUnitIdFactory,
 });
 
 const tokenClient = createTokenClient({
   transport: http(config.tokenPartitionUrl, cborCodec),
-  transactionOrderFactory,
 });
 
 const unitIds = (await moneyClient.getUnitsByOwnerId(signingService.publicKey)).filter(
-  (id) => id.type.toBase16() === UnitType.MONEY_PARTITION_BILL_DATA,
+  (id) => id.type.toBase16() === MoneyPartitionUnitType.BILL,
 );
 if (unitIds.length === 0) {
   throw new Error('No bills available');
@@ -38,12 +38,12 @@ const partitions = [
   {
     client: moneyClient,
     systemIdentifier: SystemIdentifier.MONEY_PARTITION,
-    unitType: UnitType.MONEY_PARTITION_FEE_CREDIT_RECORD,
+    unitType: MoneyPartitionUnitType.FEE_CREDIT_RECORD,
   },
   {
     client: tokenClient,
     systemIdentifier: SystemIdentifier.TOKEN_PARTITION,
-    unitType: UnitType.TOKEN_PARTITION_FEE_CREDIT_RECORD,
+    unitType: TokenPartitionUnitType.FEE_CREDIT_RECORD,
   },
 ];
 
@@ -52,7 +52,7 @@ for (const { client, systemIdentifier, unitType } of partitions) {
   const round = await moneyClient.getRoundNumber();
   const ownerPredicate = await PayToPublicKeyHashPredicate.create(cborCodec, signingService.publicKey);
 
-  let transferToFeeCreditHash = await moneyClient.transferToFeeCredit(
+  let transferToFeeCreditHash = await moneyClient.transferFeeCredit(
     {
       bill,
       amount: 100n,
@@ -69,20 +69,20 @@ for (const { client, systemIdentifier, unitType } of partitions) {
     },
   );
 
-  let proof = await waitTransactionProof(moneyClient, transferToFeeCreditHash);
-  const feeCreditRecordUnitId = proof.transactionRecord.transactionOrder.payload.attributes.targetUnitId;
-  const feeCreditRecordId = new UnitIdWithType(feeCreditRecordUnitId.bytes, unitType);
+  const transferFeeCreditProof = await moneyClient.waitTransactionProof(transferToFeeCreditHash, TransferFeeCreditTransactionRecordWithProof);
+  const feeCreditRecordId = transferFeeCreditProof.transactionRecord.transactionOrder.payload.unitId;
 
   const addFeeCreditHash = await client.addFeeCredit(
     {
       ownerPredicate: ownerPredicate,
-      proof,
+      proof: transferFeeCreditProof,
       feeCreditRecord: { unitId: feeCreditRecordId },
-    },
-    {
       maxTransactionFee: 5n,
       timeout: round + 60n,
+      networkIdentifier: NetworkIdentifier.LOCAL,
+      stateLock: null,
+      stateUnlock: new AlwaysTruePredicate(),
     },
   );
-  console.log((await waitTransactionProof(client, addFeeCreditHash)).toString());
+  console.log((await client.waitTransactionProof(addFeeCreditHash, AddFeeCreditTransactionRecordWithProof)).toString());
 }

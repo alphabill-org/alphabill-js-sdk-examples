@@ -1,40 +1,37 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
-import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/PayToPublicKeyHashPredicate.js';
-import { TransactionOrderFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/TransactionOrderFactory.js';
-import { UnitType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitType.js';
+import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
-import { waitTransactionProof } from '../waitTransactionProof.mjs';
+import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
+import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
+import {
+  TransferBillToDustCollectorTransactionRecordWithProof
+} from '@alphabill/alphabill-js-sdk/lib/money/transactions/TransferBillToDustCollectorTransactionRecordWithProof.js';
+import {
+  SwapBillsWithDustCollectorTransactionRecordWithProof
+} from '@alphabill/alphabill-js-sdk/lib/money/transactions/SwapBillsWithDustCollectorTransactionRecordWithProof.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
-const transactionOrderFactory = new TransactionOrderFactory(cborCodec, signingService);
 
 const client = createMoneyClient({
-  transport: http(config.moneyPartitionUrl, new CborCodecNode()),
-  transactionOrderFactory: transactionOrderFactory,
+  transport: http(config.moneyPartitionUrl, cborCodec),
 });
 
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
-const feeCreditRecordId = units.findLast((id) => id.type.toBase16() === UnitType.MONEY_PARTITION_FEE_CREDIT_RECORD);
-const targetBillId = units.findLast((id) => id.type.toBase16() === UnitType.MONEY_PARTITION_BILL_DATA);
-const billId = units.findLast((id) => id.type.toBase16() === UnitType.MONEY_PARTITION_BILL_DATA && id !== targetBillId);
+const feeCreditRecordId = units.findLast((id) => id.type.toBase16() === MoneyPartitionUnitType.FEE_CREDIT_RECORD);
+const targetBillId = units.findLast((id) => id.type.toBase16() === MoneyPartitionUnitType.BILL);
+const billId = units.findLast((id) => id.type.toBase16() === MoneyPartitionUnitType.BILL && id !== targetBillId);
 
 if (!targetBillId || !billId) {
   throw new Error('No bills available');
 }
 
-/**
- * @type {Bill|null}
- */
-const targetBill = await client.getUnit(targetBillId, false);
-/**
- * @type {Bill|null}
- */
-const bill = await client.getUnit(billId, false);
+const targetBill = await client.getUnit(targetBillId, false, Bill);
+const bill = await client.getUnit(billId, false, Bill);
 const round = await client.getRoundNumber();
 
 const transferBillToDustCollectorHash = await client.transferBillToDustCollector(
@@ -48,7 +45,7 @@ const transferBillToDustCollectorHash = await client.transferBillToDustCollector
     feeCreditRecordId,
   },
 );
-const transactionProof = await waitTransactionProof(client, transferBillToDustCollectorHash);
+const transactionProof = await client.waitTransactionProof(transferBillToDustCollectorHash, TransferBillToDustCollectorTransactionRecordWithProof);
 
 const swapBillsWithDustCollectorHash = await client.swapBillsWithDustCollector(
   {
@@ -62,4 +59,4 @@ const swapBillsWithDustCollectorHash = await client.swapBillsWithDustCollector(
     feeCreditRecordId,
   },
 );
-console.log((await waitTransactionProof(client, swapBillsWithDustCollectorHash))?.toString());
+console.log((await client.waitTransactionProof(swapBillsWithDustCollectorHash, SwapBillsWithDustCollectorTransactionRecordWithProof))?.toString());

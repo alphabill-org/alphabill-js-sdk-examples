@@ -1,30 +1,29 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
-import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/AlwaysTruePredicate.js';
-import { TokenIcon } from '@alphabill/alphabill-js-sdk/lib/transaction/TokenIcon.js';
-import { TransactionOrderFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/TransactionOrderFactory.js';
+import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
+import { TokenIcon } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenIcon.js';
 import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitIdWithType.js';
-import { UnitType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitType.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
-import { waitTransactionProof } from '../waitTransactionProof.mjs';
+import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
+import {
+  CreateFungibleTokenTypeTransactionRecordWithProof
+} from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/CreateFungibleTokenTypeTransactionRecordWithProof.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
-const transactionOrderFactory = new TransactionOrderFactory(cborCodec, signingService);
 
 const client = createTokenClient({
   transport: http(config.tokenPartitionUrl, cborCodec),
-  transactionOrderFactory: transactionOrderFactory,
 });
 
 const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).findLast(
-  (id) => id.type.toBase16() === UnitType.TOKEN_PARTITION_FEE_CREDIT_RECORD,
+  (id) => id.type.toBase16() === TokenPartitionUnitType.FEE_CREDIT_RECORD,
 );
 const round = await client.getRoundNumber();
-const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), UnitType.TOKEN_PARTITION_FUNGIBLE_TOKEN_TYPE);
+const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), TokenPartitionUnitType.FUNGIBLE_TOKEN_TYPE);
 
 const createFungibleTokenTypeHash = await client.createFungibleTokenType(
   {
@@ -35,9 +34,8 @@ const createFungibleTokenTypeHash = await client.createFungibleTokenType(
     parentTypeId: null,
     decimalPlaces: 8,
     subTypeCreationPredicate: new AlwaysTruePredicate(),
-    tokenCreationPredicate: new AlwaysTruePredicate(),
-    invariantPredicate: new AlwaysTruePredicate(),
-    subTypeCreationPredicateSignatures: null,
+    tokenMintingPredicate: new AlwaysTruePredicate(),
+    tokenTypeOwnerPredicate: new AlwaysTruePredicate(),
   },
   {
     maxTransactionFee: 5n,
@@ -45,4 +43,4 @@ const createFungibleTokenTypeHash = await client.createFungibleTokenType(
     feeCreditRecordId,
   },
 );
-console.log((await waitTransactionProof(client, createFungibleTokenTypeHash))?.toString());
+console.log((await client.waitTransactionProof(createFungibleTokenTypeHash, CreateFungibleTokenTypeTransactionRecordWithProof))?.toString());
