@@ -1,18 +1,19 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
+import { NonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleToken.js';
+import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
+import { TransferNonFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/TransferNonFungibleTokenTransactionRecordWithProof.js';
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
-import { NonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleToken.js';
-import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
 
 const client = createTokenClient({
-  transport: http(config.tokenPartitionUrl, new cborCodec),
+  transport: http(config.tokenPartitionUrl, new cborCodec()),
 });
 
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
@@ -30,7 +31,6 @@ const transferNonFungibleTokenHash = await client.transferNonFungibleToken(
     ownerPredicate: await PayToPublicKeyHashPredicate.create(cborCodec, signingService.publicKey),
     nonce: null,
     type: { unitId: token.tokenType },
-    invariantPredicateSignatures: [null],
   },
   {
     maxTransactionFee: 5n,
@@ -38,4 +38,8 @@ const transferNonFungibleTokenHash = await client.transferNonFungibleToken(
     feeCreditRecordId,
   },
 );
-console.log((await waitTransactionProof(client, transferNonFungibleTokenHash))?.toString());
+console.log(
+  (
+    await client.waitTransactionProof(transferNonFungibleTokenHash, TransferNonFungibleTokenTransactionRecordWithProof)
+  )?.toString(),
+);

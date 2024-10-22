@@ -1,16 +1,14 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
-import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { TokenIcon } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenIcon.js';
+import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
+import { CreateFungibleTokenTypeTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/CreateFungibleTokenTypeTransactionRecordWithProof.js';
+import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitIdWithType.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
-import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
-import {
-  CreateFungibleTokenTypeTransactionRecordWithProof
-} from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/CreateFungibleTokenTypeTransactionRecordWithProof.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
@@ -43,4 +41,8 @@ const createFungibleTokenTypeHash = await client.createFungibleTokenType(
     feeCreditRecordId,
   },
 );
-console.log((await client.waitTransactionProof(createFungibleTokenTypeHash, CreateFungibleTokenTypeTransactionRecordWithProof))?.toString());
+console.log(
+  (
+    await client.waitTransactionProof(createFungibleTokenTypeHash, CreateFungibleTokenTypeTransactionRecordWithProof)
+  )?.toString(),
+);

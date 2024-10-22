@@ -1,20 +1,16 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
+import { AddFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/AddFeeCreditTransactionRecordWithProof.js';
+import { TransferFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/TransferFeeCreditTransactionRecordWithProof.js';
+import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
+import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { SystemIdentifier } from '@alphabill/alphabill-js-sdk/lib/SystemIdentifier.js';
+import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
+import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
-import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 import config from '../config.js';
-import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
-import {
-  TransferFeeCreditTransactionRecordWithProof
-} from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/TransferFeeCreditTransactionRecordWithProof.js';
-import {
-  AddFeeCreditTransactionRecordWithProof
-} from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/AddFeeCreditTransactionRecordWithProof.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
-import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
@@ -69,20 +65,21 @@ for (const { client, systemIdentifier, unitType } of partitions) {
     },
   );
 
-  const transferFeeCreditProof = await moneyClient.waitTransactionProof(transferToFeeCreditHash, TransferFeeCreditTransactionRecordWithProof);
+  const transferFeeCreditProof = await moneyClient.waitTransactionProof(
+    transferToFeeCreditHash,
+    TransferFeeCreditTransactionRecordWithProof,
+  );
   const feeCreditRecordId = transferFeeCreditProof.transactionRecord.transactionOrder.payload.unitId;
 
-  const addFeeCreditHash = await client.addFeeCredit(
-    {
-      ownerPredicate: ownerPredicate,
-      proof: transferFeeCreditProof,
-      feeCreditRecord: { unitId: feeCreditRecordId },
-      maxTransactionFee: 5n,
-      timeout: round + 60n,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      stateUnlock: new AlwaysTruePredicate(),
-    },
-  );
+  const addFeeCreditHash = await client.addFeeCredit({
+    ownerPredicate: ownerPredicate,
+    proof: transferFeeCreditProof,
+    feeCreditRecord: { unitId: feeCreditRecordId },
+    maxTransactionFee: 5n,
+    timeout: round + 60n,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    stateUnlock: new AlwaysTruePredicate(),
+  });
   console.log((await client.waitTransactionProof(addFeeCreditHash, AddFeeCreditTransactionRecordWithProof)).toString());
 }

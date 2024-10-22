@@ -1,14 +1,12 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
+import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditRecord.js';
+import { ReclaimFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/ReclaimFeeCreditTransactionRecordWithProof.js';
+import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
+import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 import config from '../config.js';
-import {
-  ReclaimFeeCreditTransactionRecordWithProof
-} from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/ReclaimFeeCreditTransactionRecordWithProof.js';
-import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditRecord.js';
-import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
@@ -39,7 +37,7 @@ const closeFeeCreditHash = await client.closeFeeCredit(
     timeout: round + 60n,
   },
 );
-const proof = await waitTransactionProof(client, closeFeeCreditHash);
+const proof = await client.waitTransactionProof(closeFeeCreditHash);
 
 const reclaimFeeCreditHash = await client.reclaimFeeCredit(
   {
@@ -51,4 +49,6 @@ const reclaimFeeCreditHash = await client.reclaimFeeCredit(
     timeout: round + 60n,
   },
 );
-console.log((await client.waitTransactionProof(reclaimFeeCreditHash, ReclaimFeeCreditTransactionRecordWithProof))?.toString());
+console.log(
+  (await client.waitTransactionProof(reclaimFeeCreditHash, ReclaimFeeCreditTransactionRecordWithProof))?.toString(),
+);

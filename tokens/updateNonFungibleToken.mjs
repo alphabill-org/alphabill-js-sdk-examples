@@ -2,15 +2,13 @@ import crypto from 'crypto';
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
+import { NonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleToken.js';
 import { NonFungibleTokenData } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleTokenData.js';
+import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
+import { UpdateNonFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UpdateNonFungibleTokenTransactionRecordWithProof.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
-import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
-import { NonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleToken.js';
-import {
-  UpdateNonFungibleTokenTransactionRecordWithProof
-} from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UpdateNonFungibleTokenTransactionRecordWithProof.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
@@ -36,4 +34,8 @@ const updateNonFungibleTokenHash = await client.updateNonFungibleToken(
     feeCreditRecordId,
   },
 );
-console.log((await client.waitTransactionProof(updateNonFungibleTokenHash, UpdateNonFungibleTokenTransactionRecordWithProof))?.toString());
+console.log(
+  (
+    await client.waitTransactionProof(updateNonFungibleTokenHash, UpdateNonFungibleTokenTransactionRecordWithProof)
+  )?.toString(),
+);

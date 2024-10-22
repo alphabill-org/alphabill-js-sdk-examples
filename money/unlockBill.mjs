@@ -1,14 +1,12 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
+import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
+import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
+import { UnlockBillTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnlockBillTransactionRecordWithProof.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
-import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
-import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import {
-  UnlockBillTransactionRecordWithProof
-} from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnlockBillTransactionRecordWithProof.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
