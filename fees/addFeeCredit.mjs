@@ -11,6 +11,17 @@ import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 import config from '../config.js';
+import {
+  PayToPublicKeyHashProofFactory
+} from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
+import {
+  UnsignedTransferFeeCreditTransactionOrder
+} from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedTransferFeeCreditTransactionOrder.js';
+import {
+  UnsignedAddFeeCreditTransactionOrder
+} from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedAddFeeCreditTransactionOrder.js';
+import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitIdWithType.js';
 
 const cborCodec = new CborCodecNode();
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
@@ -24,11 +35,12 @@ const tokenClient = createTokenClient({
 });
 
 const unitIds = (await moneyClient.getUnitsByOwnerId(signingService.publicKey)).filter(
-  (id) => id.type.toBase16() === MoneyPartitionUnitType.BILL,
+  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([MoneyPartitionUnitType.BILL])),
 );
 if (unitIds.length === 0) {
   throw new Error('No bills available');
 }
+const proofFactory = new PayToPublicKeyHashProofFactory(signingService, cborCodec);
 
 const partitions = [
   {
@@ -44,42 +56,62 @@ const partitions = [
 ];
 
 for (const { client, systemIdentifier, unitType } of partitions) {
-  const bill = await moneyClient.getUnit(unitIds[0], false);
+  const bill = await moneyClient.getUnit(unitIds[0], false, Bill);
   const round = await moneyClient.getRoundNumber();
   const ownerPredicate = await PayToPublicKeyHashPredicate.create(cborCodec, signingService.publicKey);
 
-  let transferToFeeCreditHash = await moneyClient.transferFeeCredit(
+  const transferFeeCreditTransactionOrder = await UnsignedTransferFeeCreditTransactionOrder.create(
     {
-      bill,
       amount: 100n,
-      systemIdentifier,
-      feeCreditRecordParams: {
+      targetSystemIdentifier: systemIdentifier,
+      latestAdditionTime: round + 60n,
+      feeCreditRecord: {
         ownerPredicate: ownerPredicate,
         unitType: unitType,
       },
-      latestAdditionTime: round + 60n,
+      bill,
+      networkIdentifier: NetworkIdentifier.LOCAL,
+      stateLock: null,
+      metadata: {
+        timeout: round + 60n,
+        maxTransactionFee: 5n,
+        feeCreditRecordId: null,
+        referenceNumber: new Uint8Array(),
+      },
+      stateUnlock: new AlwaysTruePredicate(),
     },
-    {
-      maxTransactionFee: 5n,
-      timeout: round + 60n,
-    },
-  );
+    cborCodec,
+  ).then((transactionOrder) => transactionOrder.sign(proofFactory));
+  const transferFeeCreditHash = await moneyClient.sendTransaction(transferFeeCreditTransactionOrder);
 
   const transferFeeCreditProof = await moneyClient.waitTransactionProof(
-    transferToFeeCreditHash,
+    transferFeeCreditHash,
     TransferFeeCreditTransactionRecordWithProof,
   );
-  const feeCreditRecordId = transferFeeCreditProof.transactionRecord.transactionOrder.payload.unitId;
+  const feeCreditRecordId = new UnitIdWithType(
+    transferFeeCreditTransactionOrder.payload.attributes.targetUnitId.bytes,
+    unitType,
+  );
 
-  const addFeeCreditHash = await client.addFeeCredit({
-    ownerPredicate: ownerPredicate,
-    proof: transferFeeCreditProof,
-    feeCreditRecord: { unitId: feeCreditRecordId },
-    maxTransactionFee: 5n,
-    timeout: round + 60n,
-    networkIdentifier: NetworkIdentifier.LOCAL,
-    stateLock: null,
-    stateUnlock: new AlwaysTruePredicate(),
-  });
+  const addFeeCreditTransactionOrder = await UnsignedAddFeeCreditTransactionOrder.create(
+    {
+      targetSystemIdentifier: systemIdentifier,
+      ownerPredicate: ownerPredicate,
+      proof: transferFeeCreditProof,
+      feeCreditRecord: { unitId: feeCreditRecordId },
+      networkIdentifier: NetworkIdentifier.LOCAL,
+      stateLock: null,
+      metadata: {
+        timeout: round + 60n,
+        maxTransactionFee: 5n,
+        feeCreditRecordId: null,
+        referenceNumber: new Uint8Array(),
+      },
+      stateUnlock: new AlwaysTruePredicate(),
+    },
+    cborCodec,
+  ).then((transactionOrder) => transactionOrder.sign(proofFactory));
+  const addFeeCreditHash = await client.sendTransaction(addFeeCreditTransactionOrder);
+
   console.log((await client.waitTransactionProof(addFeeCreditHash, AddFeeCreditTransactionRecordWithProof)).toString());
 }
