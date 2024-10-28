@@ -21,9 +21,7 @@ const client = createTokenClient({
   transport: http(config.tokenPartitionUrl, cborCodec),
 });
 
-const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([TokenPartitionUnitType.FEE_CREDIT_RECORD])),
-);
+const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).feeCreditRecords.at(0);
 const round = await client.getRoundNumber();
 const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), TokenPartitionUnitType.FUNGIBLE_TOKEN_TYPE);
 

@@ -16,15 +16,15 @@ const tokenClient = createTokenClient({
   transport: http(config.tokenPartitionUrl, new CborCodecNode()),
 });
 
-const moneyUnitIds = await moneyClient.getUnitsByOwnerId(signingService.publicKey);
-if (moneyUnitIds.length > 0) {
+const billIds = (await moneyClient.getUnitsByOwnerId(signingService.publicKey)).bills;
+if (billIds.length > 0) {
   console.log('Money partition units:');
-  moneyUnitIds.map((id) => console.log(Base16Converter.encode(id.bytes)));
+  billIds.map((id) => console.log(id.toString()));
 }
 
-// get units from token partition
-const tokenUnitIds = await tokenClient.getUnitsByOwnerId(signingService.publicKey);
+// get fungible tokens from token partition
+const tokenUnitIds = (await tokenClient.getUnitsByOwnerId(signingService.publicKey)).fungibleTokens;
 if (tokenUnitIds.length > 0) {
-  console.log('Token partition units:');
-  tokenUnitIds.map((id) => console.log(Base16Converter.encode(id.bytes)));
+  console.log('Token partition fungible tokens:');
+  tokenUnitIds.map((id) => console.log(id.toString()));
 }

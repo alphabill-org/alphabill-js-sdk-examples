@@ -3,7 +3,6 @@ import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdenti
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { NonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleToken.js';
-import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
 import { TransferNonFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/TransferNonFungibleTokenTransactionRecordWithProof.js';
 import { UnsignedTransferNonFungibletokenTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedTransferNonFungibletokenTransactionOrder.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
@@ -24,12 +23,8 @@ const client = createTokenClient({
 });
 
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
-const tokenId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([TokenPartitionUnitType.NON_FUNGIBLE_TOKEN])),
-);
-const feeCreditRecordId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([TokenPartitionUnitType.FEE_CREDIT_RECORD])),
-);
+const tokenId = units.nonFungibleTokens.at(0);
+const feeCreditRecordId = units.feeCreditRecords.at(0);
 const round = await client.getRoundNumber();
 const token = await client.getUnit(tokenId, false, NonFungibleToken);
 if (token === null) {

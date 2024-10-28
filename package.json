@@ -8,7 +8,7 @@
     "lint:fix": "eslint \"./**/*.mjs\" --fix"
   },
   "dependencies": {
-    "@alphabill/alphabill-js-sdk": "0.5.0-rc1"
+    "@alphabill/alphabill-js-sdk": "0.5.0-rc1-rc.d9402f4"
   },
   "devDependencies": {
     "eslint": "^8.57.0",

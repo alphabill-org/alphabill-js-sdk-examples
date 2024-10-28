@@ -2,7 +2,6 @@ import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCo
 import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditRecord.js';
 import { UnlockFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/UnlockFeeCreditTransactionRecordWithProof.js';
 import { UnsignedUnlockFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedUnlockFeeCreditTransactionOrder.js';
-import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -20,11 +19,9 @@ const client = createMoneyClient({
 });
 
 const round = await client.getRoundNumber();
-const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([MoneyPartitionUnitType.FEE_CREDIT_RECORD])),
-);
+const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).feeCreditRecords.at(0);
 const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCreditRecord);
-console.log('Fee credit lock status: ' + feeCreditRecord?.locked);
+console.log(feeCreditRecord.toString());
 
 console.log('Unlocking fee credit...');
 const unlockFeeCreditTransactionOrder = await (

@@ -5,7 +5,6 @@ import { UnsignedDeleteFeeCreditTransactionOrder } from '@alphabill/alphabill-js
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
-import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
@@ -19,9 +18,7 @@ const client = createTokenClient({
   transport: http(config.tokenPartitionUrl, cborCodec),
 });
 const round = await client.getRoundNumber();
-const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([TokenPartitionUnitType.FEE_CREDIT_RECORD])),
-);
+const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).feeCreditRecords.at(0);
 const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCreditRecord);
 
 console.log('Deleting fee credit...');

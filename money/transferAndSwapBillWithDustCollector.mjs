@@ -1,6 +1,5 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
 import { SwapBillsWithDustCollectorTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/SwapBillsWithDustCollectorTransactionRecordWithProof.js';
 import { TransferBillToDustCollectorTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/TransferBillToDustCollectorTransactionRecordWithProof.js';
 import { UnsignedSwapBillsWithDustCollectorTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnsignedSwapBillsWithDustCollectorTransactionOrder.js';
@@ -24,17 +23,15 @@ const client = createMoneyClient({
 
 const round = await client.getRoundNumber();
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
-const feeCreditRecordId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([MoneyPartitionUnitType.FEE_CREDIT_RECORD])),
-);
-const billUnitIds = (await client.getUnitsByOwnerId(signingService.publicKey)).filter(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([MoneyPartitionUnitType.BILL])),
-);
-const bill = await client.getUnit(billUnitIds[0], false, Bill);
-const targetBill = await client.getUnit(billUnitIds[1], false, Bill);
+const feeCreditRecordId = units.feeCreditRecords.at(0);
+const billUnitIds = units.bills;
+const bill = await client.getUnit(billUnitIds.at(0), false, Bill);
+const targetBill = await client.getUnit(billUnitIds.at(1), false, Bill);
 if (!bill || !targetBill) {
   throw new Error('No bills available');
 }
+console.log(bill.toString());
+console.log('Target ' + targetBill.toString());
 
 console.log('Transferring bill to dust collector...');
 const transferBillToDustCollectorTransactionOrder = await (

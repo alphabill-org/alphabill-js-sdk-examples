@@ -11,9 +11,10 @@ const client = createMoneyClient({
   transport: http(config.moneyPartitionUrl, new CborCodecNode()),
 });
 
-const unitIds = await client.getUnitsByOwnerId(signingService.publicKey);
-if (unitIds.length > 0) {
-  console.log(await client.getUnit(unitIds.at(-1), true, Bill));
+const billIds = (await client.getUnitsByOwnerId(signingService.publicKey)).bills;
+if (billIds.length > 0) {
+  const bill = await client.getUnit(billIds.at(0), true, Bill);
+  console.log(bill.toString());
 } else {
-  console.log('No units available');
+  console.log('No bills available');
 }

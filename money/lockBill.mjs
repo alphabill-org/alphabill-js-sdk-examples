@@ -1,6 +1,5 @@
 import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
 import { LockBillTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/LockBillTransactionRecordWithProof.js';
 import { UnsignedLockBillTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnsignedLockBillTransactionOrder.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
@@ -21,14 +20,11 @@ const client = createMoneyClient({
 });
 
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
-const billId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([MoneyPartitionUnitType.BILL])),
-);
-const feeCreditRecordId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([MoneyPartitionUnitType.FEE_CREDIT_RECORD])),
-);
+const billId = units.bills.at(0);
+const feeCreditRecordId = units.feeCreditRecords.at(0);
 const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
+console.log(bill.toString());
 
 const lockBillTransactionOrder = await (
   await UnsignedLockBillTransactionOrder.create(

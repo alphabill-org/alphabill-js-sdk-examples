@@ -5,7 +5,6 @@ import { ReclaimFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill
 import { UnsignedCloseFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedCloseFeeCreditTransactionOrder.js';
 import { UnsignedReclaimFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedReclaimFeeCreditTransactionOrder.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { MoneyPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/money/MoneyPartitionUnitType.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -23,12 +22,8 @@ const client = createMoneyClient({
 });
 
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
-const targetBillId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([MoneyPartitionUnitType.BILL])),
-);
-const feeCreditRecordId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([MoneyPartitionUnitType.FEE_CREDIT_RECORD])),
-);
+const targetBillId = units.bills.at(0);
+const feeCreditRecordId = units.feeCreditRecords.at(0);
 if (!feeCreditRecordId) {
   throw new Error('No fee credit available');
 }

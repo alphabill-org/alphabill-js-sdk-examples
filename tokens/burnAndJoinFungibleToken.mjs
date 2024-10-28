@@ -14,7 +14,7 @@ import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { AlwaysTrueProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/AlwaysTrueProofFactory.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
-import { UnitId } from '@alphabill/alphabill-js-sdk/lib/UnitId.js';
+import { areUint8ArraysEqual } from '@alphabill/alphabill-js-sdk/lib/util/ArrayUtils.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 import config from '../config.js';
 
@@ -28,12 +28,8 @@ const client = createTokenClient({
 });
 
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
-const tokenId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([TokenPartitionUnitType.FUNGIBLE_TOKEN])),
-);
-const feeCreditRecordId = units.findLast(
-  (id) => id.type.toBase16() === Base16Converter.encode(new Uint8Array([TokenPartitionUnitType.FEE_CREDIT_RECORD])),
-);
+const tokenId = units.fungibleTokens.at(0);
+const feeCreditRecordId = units.feeCreditRecords.at(0);
 const round = await client.getRoundNumber();
 const token = await client.getUnit(tokenId, false, FungibleToken);
 
@@ -66,14 +62,12 @@ const splitFungibleTokenProof = await client.waitTransactionProof(
 );
 
 // 2. find the token that was split
-console.log(splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnits);
-const splitTokenId = splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnits
-  .map((bytes) => UnitId.fromBytes(bytes))
-  .find(
-    (id) =>
-      id.type.toBase16() === Base16Converter.encode(new Uint8Array([TokenPartitionUnitType.FUNGIBLE_TOKEN])) &&
-      Base16Converter.encode(id.bytes) !== Base16Converter.encode(token.unitId.bytes),
-  );
+console.log(splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnitIds);
+const splitTokenId = splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnitIds.find(
+  (id) =>
+    areUint8ArraysEqual(id.type, TokenPartitionUnitType.FUNGIBLE_TOKEN) &&
+    Base16Converter.encode(id.bytes) !== Base16Converter.encode(token.unitId.bytes),
+);
 
 const splitToken = await client.getUnit(splitTokenId, false, FungibleToken);
 console.log('Split token ID: ' + Base16Converter.encode(splitTokenId.bytes));
