@@ -46,5 +46,5 @@ const unlockFungibleTokenTransactionOrder = await UnsignedUnlockTokenTransaction
 const unlockFungibleTokenHash = await client.sendTransaction(unlockFungibleTokenTransactionOrder);
 
 console.log(
-  (await client.waitTransactionProof(unlockFungibleTokenHash, UnlockTokenTransactionRecordWithProof))?.toString(),
+  (await client.waitTransactionProof(unlockFungibleTokenHash, UnlockTokenTransactionRecordWithProof)).toString(),
 );

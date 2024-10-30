@@ -49,4 +49,4 @@ const splitBillTransactionOrder = await UnsignedSplitBillTransactionOrder.create
 ).sign(proofFactory, proofFactory);
 const splitBillHash = await client.sendTransaction(splitBillTransactionOrder);
 
-console.log((await client.waitTransactionProof(splitBillHash, SplitBillTransactionRecordWithProof))?.toString());
+console.log((await client.waitTransactionProof(splitBillHash, SplitBillTransactionRecordWithProof)).toString());

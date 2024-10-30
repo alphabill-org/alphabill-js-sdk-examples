@@ -81,5 +81,5 @@ console.log(
       swapBillsWithDustCollectorHash,
       SwapBillsWithDustCollectorTransactionRecordWithProof,
     )
-  )?.toString(),
+  ).toString(),
 );

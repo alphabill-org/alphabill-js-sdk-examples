@@ -45,4 +45,4 @@ const transferBillTransactionOrder = await UnsignedTransferBillTransactionOrder.
 ).sign(proofFactory, proofFactory);
 const transferBillHash = await client.sendTransaction(transferBillTransactionOrder);
 
-console.log((await client.waitTransactionProof(transferBillHash, TransferBillTransactionRecordWithProof))?.toString());
+console.log((await client.waitTransactionProof(transferBillHash, TransferBillTransactionRecordWithProof)).toString());

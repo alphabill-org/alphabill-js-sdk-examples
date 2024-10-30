@@ -43,5 +43,5 @@ const unlockFeeCreditTransactionOrder = await UnsignedUnlockFeeCreditTransaction
 const unlockFeeCreditHash = await client.sendTransaction(unlockFeeCreditTransactionOrder);
 
 console.log(
-  (await client.waitTransactionProof(unlockFeeCreditHash, UnlockFeeCreditTransactionRecordWithProof))?.toString(),
+  (await client.waitTransactionProof(unlockFeeCreditHash, UnlockFeeCreditTransactionRecordWithProof)).toString(),
 );

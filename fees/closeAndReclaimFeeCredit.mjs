@@ -73,5 +73,5 @@ const reclaimFeeCreditTransactionOrder = await UnsignedReclaimFeeCreditTransacti
 const reclaimFeeCreditHash = await client.sendTransaction(reclaimFeeCreditTransactionOrder);
 
 console.log(
-  (await client.waitTransactionProof(reclaimFeeCreditHash, ReclaimFeeCreditTransactionRecordWithProof))?.toString(),
+  (await client.waitTransactionProof(reclaimFeeCreditHash, ReclaimFeeCreditTransactionRecordWithProof)).toString(),
 );

@@ -55,5 +55,5 @@ console.log(
       createNonFungibleTokenTypeHash,
       CreateNonFungibleTokenTypeTransactionRecordWithProof,
     )
-  )?.toString(),
+  ).toString(),
 );

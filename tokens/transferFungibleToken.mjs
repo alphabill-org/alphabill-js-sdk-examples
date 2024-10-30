@@ -54,5 +54,5 @@ const transferFungibleTokenHash = await client.sendTransaction(transferFungibleT
 console.log(
   (
     await client.waitTransactionProof(transferFungibleTokenHash, TransferFungibleTokenTransactionRecordWithProof)
-  )?.toString(),
+  ).toString(),
 );

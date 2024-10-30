@@ -42,4 +42,4 @@ const setFeeCreditTransactionOrder = await UnsignedSetFeeCreditTransactionOrder.
 
 const setFeeCreditHash = await client.sendTransaction(setFeeCreditTransactionOrder);
 
-console.log((await client.waitTransactionProof(setFeeCreditHash, SetFeeCreditTransactionRecordWithProof))?.toString());
+console.log((await client.waitTransactionProof(setFeeCreditHash, SetFeeCreditTransactionRecordWithProof)).toString());

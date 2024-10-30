@@ -43,6 +43,4 @@ const lockFungibleTokenTransactionOrder = await UnsignedLockTokenTransactionOrde
 ).sign(proofFactory, proofFactory);
 const lockFungibleTokenHash = await client.sendTransaction(lockFungibleTokenTransactionOrder);
 
-console.log(
-  (await client.waitTransactionProof(lockFungibleTokenHash, LockTokenTransactionRecordWithProof))?.toString(),
-);
+console.log((await client.waitTransactionProof(lockFungibleTokenHash, LockTokenTransactionRecordWithProof)).toString());

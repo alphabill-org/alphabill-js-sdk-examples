@@ -41,5 +41,5 @@ const deleteFeeCreditTransactionOrder = await UnsignedDeleteFeeCreditTransaction
 const deleteFeeCreditHash = await client.sendTransaction(deleteFeeCreditTransactionOrder);
 
 console.log(
-  (await client.waitTransactionProof(deleteFeeCreditHash, DeleteFeeCreditTransactionRecordWithProof))?.toString(),
+  (await client.waitTransactionProof(deleteFeeCreditHash, DeleteFeeCreditTransactionRecordWithProof)).toString(),
 );

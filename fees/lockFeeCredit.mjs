@@ -41,6 +41,4 @@ const lockFeeCreditTransactionOrder = await UnsignedLockFeeCreditTransactionOrde
 ).sign(proofFactory);
 
 const lockFeeCreditHash = await client.sendTransaction(lockFeeCreditTransactionOrder);
-console.log(
-  (await client.waitTransactionProof(lockFeeCreditHash, LockFeeCreditTransactionRecordWithProof))?.toString(),
-);
+console.log((await client.waitTransactionProof(lockFeeCreditHash, LockFeeCreditTransactionRecordWithProof)).toString());

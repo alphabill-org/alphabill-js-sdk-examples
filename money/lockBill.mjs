@@ -44,4 +44,4 @@ const lockBillTransactionOrder = await UnsignedLockBillTransactionOrder.create(
 ).sign(proofFactory, proofFactory);
 
 const lockBillHash = await client.sendTransaction(lockBillTransactionOrder);
-console.log((await client.waitTransactionProof(lockBillHash, LockBillTransactionRecordWithProof))?.toString());
+console.log((await client.waitTransactionProof(lockBillHash, LockBillTransactionRecordWithProof)).toString());

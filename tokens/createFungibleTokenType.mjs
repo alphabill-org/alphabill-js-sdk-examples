@@ -53,5 +53,5 @@ const createFungibleTokenTypeHash = await client.sendTransaction(createFungibleT
 console.log(
   (
     await client.waitTransactionProof(createFungibleTokenTypeHash, CreateFungibleTokenTypeTransactionRecordWithProof)
-  )?.toString(),
+  ).toString(),
 );

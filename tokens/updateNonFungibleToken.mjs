@@ -50,5 +50,5 @@ const updateNonFungibleTokenHash = await client.sendTransaction(updateNonFungibl
 console.log(
   (
     await client.waitTransactionProof(updateNonFungibleTokenHash, UpdateNonFungibleTokenTransactionRecordWithProof)
-  )?.toString(),
+  ).toString(),
 );

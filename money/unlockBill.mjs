@@ -42,4 +42,4 @@ const unlockBillTransactionOrder = await UnsignedUnlockBillTransactionOrder.crea
   cborCodec,
 ).sign(proofFactory, proofFactory);
 const unlockBillHash = await client.sendTransaction(unlockBillTransactionOrder);
-console.log((await client.waitTransactionProof(unlockBillHash, UnlockBillTransactionRecordWithProof))?.toString());
+console.log((await client.waitTransactionProof(unlockBillHash, UnlockBillTransactionRecordWithProof)).toString());

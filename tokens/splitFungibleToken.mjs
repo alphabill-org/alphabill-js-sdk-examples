@@ -49,5 +49,5 @@ const splitFungibleTokenTransactionOrder = await UnsignedSplitFungibleTokenTrans
 const splitFungibleTokenHash = await client.sendTransaction(splitFungibleTokenTransactionOrder);
 
 console.log(
-  (await client.waitTransactionProof(splitFungibleTokenHash, SplitFungibleTokenTransactionRecordWithProof))?.toString(),
+  (await client.waitTransactionProof(splitFungibleTokenHash, SplitFungibleTokenTransactionRecordWithProof)).toString(),
 );

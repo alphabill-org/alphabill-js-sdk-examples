@@ -14,6 +14,7 @@ import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { AlwaysTrueProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/AlwaysTrueProofFactory.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { UnitId } from '@alphabill/alphabill-js-sdk/lib/UnitId.js';
 import { areUint8ArraysEqual } from '@alphabill/alphabill-js-sdk/lib/util/ArrayUtils.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 import config from '../config.js';
@@ -64,14 +65,12 @@ const splitFungibleTokenProof = await client.waitTransactionProof(
 // 2. find the token that was split
 console.log(splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnitIds);
 const splitTokenId = splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnitIds.find(
-  (id) =>
-    areUint8ArraysEqual(id.type, TokenPartitionUnitType.FUNGIBLE_TOKEN) &&
-    Base16Converter.encode(id.bytes) !== Base16Converter.encode(token.unitId.bytes),
+  (id) => areUint8ArraysEqual(id.type, TokenPartitionUnitType.FUNGIBLE_TOKEN) && UnitId.equals(id, token.unitId),
 );
 
 const splitToken = await client.getUnit(splitTokenId, false, FungibleToken);
 console.log('Split token ID: ' + Base16Converter.encode(splitTokenId.bytes));
-console.log('Split token value: ' + splitToken?.value);
+console.log('Split token value: ' + splitToken.value);
 
 // 3. check that the original tokens value has been reduced
 const originalTokenAfterSplit = await client.getUnit(tokenId, false, FungibleToken);
@@ -125,4 +124,4 @@ await client.waitTransactionProof(joinFungibleTokenHash, JoinFungibleTokenTransa
 
 // 6. check that the original tokens value has been increased
 const originalTokenAfterJoin = await client.getUnit(tokenId, false, FungibleToken);
-console.log("Original token's value after join: " + originalTokenAfterJoin?.value);
+console.log("Original token's value after join: " + originalTokenAfterJoin.value);
