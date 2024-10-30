@@ -47,7 +47,7 @@ const createFungibleTokenTypeTransactionOrder = await UnsignedCreateFungibleToke
     stateUnlock: new AlwaysTruePredicate(),
   },
   cborCodec,
-).then((transactionOrder) => transactionOrder.sign(proofFactory, []));
+).sign(proofFactory, []);
 const createFungibleTokenTypeHash = await client.sendTransaction(createFungibleTokenTypeTransactionOrder);
 
 console.log(

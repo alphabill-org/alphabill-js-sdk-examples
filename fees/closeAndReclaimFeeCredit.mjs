@@ -32,23 +32,21 @@ const bill = await client.getUnit(targetBillId, false, Bill);
 const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCreditRecord);
 const round = await client.getRoundNumber();
 
-const closeFeeCreditTransactionOrder = await (
-  await UnsignedCloseFeeCreditTransactionOrder.create(
-    {
-      bill: bill,
-      feeCreditRecord: feeCreditRecord,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: null,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const closeFeeCreditTransactionOrder = await UnsignedCloseFeeCreditTransactionOrder.create(
+  {
+    bill: bill,
+    feeCreditRecord: feeCreditRecord,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: null,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory);
 const closeFeeCreditHash = await client.sendTransaction(closeFeeCreditTransactionOrder);
 const closeFeeCreditProof = await client.waitTransactionProof(
@@ -56,23 +54,21 @@ const closeFeeCreditProof = await client.waitTransactionProof(
   CloseFeeCreditTransactionRecordWithProof,
 );
 
-const reclaimFeeCreditTransactionOrder = await (
-  await UnsignedReclaimFeeCreditTransactionOrder.create(
-    {
-      proof: closeFeeCreditProof,
-      bill: bill,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: null,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const reclaimFeeCreditTransactionOrder = await UnsignedReclaimFeeCreditTransactionOrder.create(
+  {
+    proof: closeFeeCreditProof,
+    bill: bill,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: null,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory);
 const reclaimFeeCreditHash = await client.sendTransaction(reclaimFeeCreditTransactionOrder);
 

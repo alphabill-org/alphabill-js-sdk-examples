@@ -34,23 +34,21 @@ console.log(bill.toString());
 console.log('Target ' + targetBill.toString());
 
 console.log('Transferring bill to dust collector...');
-const transferBillToDustCollectorTransactionOrder = await (
-  await UnsignedTransferBillToDustCollectorTransactionOrder.create(
-    {
-      bill: bill,
-      targetBill: targetBill,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: feeCreditRecordId,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const transferBillToDustCollectorTransactionOrder = await UnsignedTransferBillToDustCollectorTransactionOrder.create(
+  {
+    bill: bill,
+    targetBill: targetBill,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: feeCreditRecordId,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory, proofFactory);
 const transferBillToDustCollectorHash = await client.sendTransaction(transferBillToDustCollectorTransactionOrder);
 const transferBillToDustCollectorProof = await client.waitTransactionProof(
@@ -59,23 +57,21 @@ const transferBillToDustCollectorProof = await client.waitTransactionProof(
 );
 
 console.log('Swapping bill with dust collector...');
-const swapBillWithDustCollectorTransactionOrder = await (
-  await UnsignedSwapBillsWithDustCollectorTransactionOrder.create(
-    {
-      bill: targetBill,
-      proofs: [transferBillToDustCollectorProof],
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: feeCreditRecordId,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const swapBillWithDustCollectorTransactionOrder = await UnsignedSwapBillsWithDustCollectorTransactionOrder.create(
+  {
+    bill: targetBill,
+    proofs: [transferBillToDustCollectorProof],
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: feeCreditRecordId,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory, proofFactory);
 const swapBillsWithDustCollectorHash = await client.sendTransaction(swapBillWithDustCollectorTransactionOrder);
 

@@ -24,22 +24,20 @@ const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCredit
 console.log(feeCreditRecord.toString());
 
 console.log('Unlocking fee credit...');
-const unlockFeeCreditTransactionOrder = await (
-  await UnsignedUnlockFeeCreditTransactionOrder.create(
-    {
-      feeCredit: feeCreditRecord,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: null,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const unlockFeeCreditTransactionOrder = await UnsignedUnlockFeeCreditTransactionOrder.create(
+  {
+    feeCredit: feeCreditRecord,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: null,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory);
 
 const unlockFeeCreditHash = await client.sendTransaction(unlockFeeCreditTransactionOrder);

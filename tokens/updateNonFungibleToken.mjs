@@ -44,7 +44,7 @@ const updateNonFungibleTokenTransactionOrder = await UnsignedUpdateNonFungibleTo
     stateUnlock: new AlwaysTruePredicate(),
   },
   cborCodec,
-).then((transactionOrder) => transactionOrder.sign(alwaysTrueProofFactory, proofFactory, [alwaysTrueProofFactory]));
+).sign(alwaysTrueProofFactory, proofFactory, [alwaysTrueProofFactory]);
 const updateNonFungibleTokenHash = await client.sendTransaction(updateNonFungibleTokenTransactionOrder);
 
 console.log(

@@ -67,7 +67,7 @@ for (const { client, systemIdentifier } of partitions) {
       stateUnlock: new AlwaysTruePredicate(),
     },
     cborCodec,
-  ).then((transactionOrder) => transactionOrder.sign(proofFactory));
+  ).sign(proofFactory);
   const transferFeeCreditHash = await moneyClient.sendTransaction(transferFeeCreditTransactionOrder);
 
   const transferFeeCreditProof = await moneyClient.waitTransactionProof(
@@ -96,7 +96,7 @@ for (const { client, systemIdentifier } of partitions) {
       stateUnlock: new AlwaysTruePredicate(),
     },
     cborCodec,
-  ).then((transactionOrder) => transactionOrder.sign(proofFactory));
+  ).sign(proofFactory);
   const addFeeCreditHash = await client.sendTransaction(addFeeCreditTransactionOrder);
 
   console.log((await client.waitTransactionProof(addFeeCreditHash, AddFeeCreditTransactionRecordWithProof)).toString());

@@ -27,23 +27,21 @@ const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
 console.log(bill.toString());
 
-const transferBillTransactionOrder = await (
-  await UnsignedTransferBillTransactionOrder.create(
-    {
-      ownerPredicate: await PayToPublicKeyHashPredicate.create(cborCodec, signingService.publicKey),
-      bill: bill,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: feeCreditRecordId,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const transferBillTransactionOrder = await UnsignedTransferBillTransactionOrder.create(
+  {
+    ownerPredicate: await PayToPublicKeyHashPredicate.create(cborCodec, signingService.publicKey),
+    bill: bill,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: feeCreditRecordId,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory, proofFactory);
 const transferBillHash = await client.sendTransaction(transferBillTransactionOrder);
 

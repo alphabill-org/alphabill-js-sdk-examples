@@ -45,7 +45,7 @@ const splitFungibleTokenTransactionOrder = await UnsignedSplitFungibleTokenTrans
     stateUnlock: new AlwaysTruePredicate(),
   },
   cborCodec,
-).then((transactionOrder) => transactionOrder.sign(proofFactory, proofFactory, [alwaysTrueProofFactory]));
+).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const splitFungibleTokenHash = await client.sendTransaction(splitFungibleTokenTransactionOrder);
 
 console.log(

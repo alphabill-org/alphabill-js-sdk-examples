@@ -46,7 +46,7 @@ const createNonFungibleTokenTypeTransactionOrder = await UnsignedCreateNonFungib
     stateUnlock: new AlwaysTruePredicate(),
   },
   cborCodec,
-).then((transactionOrder) => transactionOrder.sign(proofFactory, []));
+).sign(proofFactory, []);
 const createNonFungibleTokenTypeHash = await client.sendTransaction(createNonFungibleTokenTypeTransactionOrder);
 
 console.log(

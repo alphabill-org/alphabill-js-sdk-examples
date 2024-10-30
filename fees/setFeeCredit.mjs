@@ -21,25 +21,23 @@ const client = createTokenClient({
 const round = await client.getRoundNumber();
 
 console.log('Setting fee credit...');
-const setFeeCreditTransactionOrder = await (
-  await UnsignedSetFeeCreditTransactionOrder.create(
-    {
-      targetSystemIdentifier: SystemIdentifier.TOKEN_PARTITION,
-      ownerPredicate: await PayToPublicKeyHashPredicate.create(cborCodec, signingService.publicKey),
-      amount: 100n,
-      feeCreditRecord: { unitId: null, counter: null },
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: null,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const setFeeCreditTransactionOrder = await UnsignedSetFeeCreditTransactionOrder.create(
+  {
+    targetSystemIdentifier: SystemIdentifier.TOKEN_PARTITION,
+    ownerPredicate: await PayToPublicKeyHashPredicate.create(cborCodec, signingService.publicKey),
+    amount: 100n,
+    feeCreditRecord: { unitId: null, counter: null },
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: null,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory);
 
 const setFeeCreditHash = await client.sendTransaction(setFeeCreditTransactionOrder);

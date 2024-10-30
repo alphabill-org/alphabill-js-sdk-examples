@@ -49,7 +49,7 @@ const transferNonFungibleTokenTransactionOrder = await UnsignedTransferNonFungib
     stateUnlock: new AlwaysTruePredicate(),
   },
   cborCodec,
-).then((transactionOrder) => transactionOrder.sign(proofFactory, proofFactory, [alwaysTrueProofFactory]));
+).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const transferNonFungibleTokenHash = await client.sendTransaction(transferNonFungibleTokenTransactionOrder);
 
 console.log(

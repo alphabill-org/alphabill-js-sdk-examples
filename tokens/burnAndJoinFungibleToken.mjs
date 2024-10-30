@@ -52,7 +52,7 @@ const splitFungibleTokenTransactionOrder = await UnsignedSplitFungibleTokenTrans
     stateUnlock: new AlwaysTruePredicate(),
   },
   cborCodec,
-).then((transactionOrder) => transactionOrder.sign(proofFactory, proofFactory, [alwaysTrueProofFactory]));
+).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const splitFungibleTokenHash = await client.sendTransaction(splitFungibleTokenTransactionOrder);
 
 // 1b. wait for transaction to finalize
@@ -78,25 +78,24 @@ const originalTokenAfterSplit = await client.getUnit(tokenId, false, FungibleTok
 console.log("Original token's value after split: " + originalTokenAfterSplit.value);
 
 // 4. burn the split token using original fungible token as target
-const burnFungibleTokenHash = await client.sendTransaction(
-  await UnsignedBurnFungibleTokenTransactionOrder.create(
-    {
-      type: { unitId: splitToken.tokenType },
-      token: splitToken,
-      targetToken: originalTokenAfterSplit,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: feeCreditRecordId,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const burnFungibleTokenTransactionOrder = await UnsignedBurnFungibleTokenTransactionOrder.create(
+  {
+    type: { unitId: splitToken.tokenType },
+    token: splitToken,
+    targetToken: originalTokenAfterSplit,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: feeCreditRecordId,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  ).then((transactionOrder) => transactionOrder.sign(proofFactory, proofFactory, [alwaysTrueProofFactory])),
-);
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
+).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
+const burnFungibleTokenHash = await client.sendTransaction(burnFungibleTokenTransactionOrder);
 const burnFungibleTokenProof = await client.waitTransactionProof(
   burnFungibleTokenHash,
   BurnFungibleTokenTransactionRecordWithProof,
@@ -118,7 +117,7 @@ const joinFungibleTokenTransactionOrder = await UnsignedJoinFungibleTokenTransac
     stateUnlock: new AlwaysTruePredicate(),
   },
   cborCodec,
-).then((transactionOrder) => transactionOrder.sign(proofFactory, proofFactory, [alwaysTrueProofFactory]));
+).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const joinFungibleTokenHash = await client.sendTransaction(joinFungibleTokenTransactionOrder);
 
 // 5b. wait for transaction to finalize

@@ -22,22 +22,20 @@ const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicK
 const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCreditRecord);
 
 console.log('Deleting fee credit...');
-const deleteFeeCreditTransactionOrder = await (
-  await UnsignedDeleteFeeCreditTransactionOrder.create(
-    {
-      feeCredit: { unitId: feeCreditRecordId, counter: feeCreditRecord.counter },
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: null,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const deleteFeeCreditTransactionOrder = await UnsignedDeleteFeeCreditTransactionOrder.create(
+  {
+    feeCredit: { unitId: feeCreditRecordId, counter: feeCreditRecord.counter },
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: null,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory);
 
 const deleteFeeCreditHash = await client.sendTransaction(deleteFeeCreditTransactionOrder);

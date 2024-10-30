@@ -26,23 +26,21 @@ const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
 console.log(bill.toString());
 
-const lockBillTransactionOrder = await (
-  await UnsignedLockBillTransactionOrder.create(
-    {
-      status: 5n,
-      bill: bill,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: feeCreditRecordId,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const lockBillTransactionOrder = await UnsignedLockBillTransactionOrder.create(
+  {
+    status: 5n,
+    bill: bill,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: feeCreditRecordId,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory, proofFactory);
 
 const lockBillHash = await client.sendTransaction(lockBillTransactionOrder);

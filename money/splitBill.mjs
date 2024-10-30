@@ -28,26 +28,24 @@ const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
 console.log(bill.toString());
 
-const splitBillTransactionOrder = await (
-  await UnsignedSplitBillTransactionOrder.create(
-    {
-      splits: [
-        { value: 2n, ownerPredicate: ownerPredicate },
-        { value: 1n, ownerPredicate: ownerPredicate },
-      ],
-      bill: bill,
-      networkIdentifier: NetworkIdentifier.LOCAL,
-      stateLock: null,
-      metadata: {
-        timeout: round + 60n,
-        maxTransactionFee: 5n,
-        feeCreditRecordId: feeCreditRecordId,
-        referenceNumber: new Uint8Array(),
-      },
-      stateUnlock: new AlwaysTruePredicate(),
+const splitBillTransactionOrder = await UnsignedSplitBillTransactionOrder.create(
+  {
+    splits: [
+      { value: 2n, ownerPredicate: ownerPredicate },
+      { value: 1n, ownerPredicate: ownerPredicate },
+    ],
+    bill: bill,
+    networkIdentifier: NetworkIdentifier.LOCAL,
+    stateLock: null,
+    metadata: {
+      timeout: round + 60n,
+      maxTransactionFee: 5n,
+      feeCreditRecordId: feeCreditRecordId,
+      referenceNumber: new Uint8Array(),
     },
-    cborCodec,
-  )
+    stateUnlock: new AlwaysTruePredicate(),
+  },
+  cborCodec,
 ).sign(proofFactory, proofFactory);
 const splitBillHash = await client.sendTransaction(splitBillTransactionOrder);
 
