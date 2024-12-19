@@ -1,4 +1,3 @@
-import { CborCodecNode } from '@alphabill/alphabill-js-sdk/lib/codec/cbor/CborCodecNode.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -8,7 +7,7 @@ import config from '../config.js';
 const signingService = new DefaultSigningService(Base16Converter.decode(config.privateKey));
 
 const client = createMoneyClient({
-  transport: http(config.moneyPartitionUrl, new CborCodecNode()),
+  transport: http(config.moneyPartitionUrl),
 });
 
 const billIds = (await client.getUnitsByOwnerId(signingService.publicKey)).bills;
