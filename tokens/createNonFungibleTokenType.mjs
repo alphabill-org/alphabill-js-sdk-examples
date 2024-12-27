@@ -2,12 +2,11 @@ import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdenti
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
-import { CreateNonFungibleTokenTypeTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/CreateNonFungibleTokenTypeTransactionRecordWithProof.js';
-import { UnsignedCreateNonFungibleTokenTypeTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedCreateNonFungibleTokenTypeTransactionOrder.js';
+import { CreateNonFungibleTokenType } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/CreateNonFungibleTokenType.js';
+import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/tokens/UnitIdWithType.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
-import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitIdWithType.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
@@ -23,7 +22,7 @@ const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicK
 const round = await client.getRoundNumber();
 const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), TokenPartitionUnitType.NON_FUNGIBLE_TOKEN_TYPE);
 
-const createNonFungibleTokenTypeTransactionOrder = await UnsignedCreateNonFungibleTokenTypeTransactionOrder.create({
+const createNonFungibleTokenTypeTransactionOrder = await CreateNonFungibleTokenType.create({
   type: { unitId: tokenTypeUnitId },
   symbol: 'E',
   name: 'Token Name',
@@ -41,11 +40,4 @@ const createNonFungibleTokenTypeTransactionOrder = await UnsignedCreateNonFungib
 }).sign(proofFactory, []);
 const createNonFungibleTokenTypeHash = await client.sendTransaction(createNonFungibleTokenTypeTransactionOrder);
 
-console.log(
-  (
-    await client.waitTransactionProof(
-      createNonFungibleTokenTypeHash,
-      CreateNonFungibleTokenTypeTransactionRecordWithProof,
-    )
-  ).toString(),
-);
+console.log((await client.waitTransactionProof(createNonFungibleTokenTypeHash, CreateNonFungibleTokenType)).toString());

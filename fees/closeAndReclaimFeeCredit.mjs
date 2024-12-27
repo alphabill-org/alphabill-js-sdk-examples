@@ -1,8 +1,6 @@
 import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditRecord.js';
-import { CloseFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/CloseFeeCreditTransactionRecordWithProof.js';
-import { ReclaimFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/ReclaimFeeCreditTransactionRecordWithProof.js';
-import { UnsignedCloseFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedCloseFeeCreditTransactionOrder.js';
-import { UnsignedReclaimFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedReclaimFeeCreditTransactionOrder.js';
+import { CloseFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/CloseFeeCredit.js';
+import { ReclaimFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/ReclaimFeeCredit.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
@@ -31,7 +29,7 @@ const bill = await client.getUnit(targetBillId, false, Bill);
 const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCreditRecord);
 const round = await client.getRoundNumber();
 
-const closeFeeCreditTransactionOrder = await UnsignedCloseFeeCreditTransactionOrder.create({
+const closeFeeCreditTransactionOrder = await CloseFeeCredit.create({
   bill: bill,
   feeCreditRecord: feeCreditRecord,
   version: 1n,
@@ -41,12 +39,9 @@ const closeFeeCreditTransactionOrder = await UnsignedCloseFeeCreditTransactionOr
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory);
 const closeFeeCreditHash = await client.sendTransaction(closeFeeCreditTransactionOrder);
-const closeFeeCreditProof = await client.waitTransactionProof(
-  closeFeeCreditHash,
-  CloseFeeCreditTransactionRecordWithProof,
-);
+const closeFeeCreditProof = await client.waitTransactionProof(closeFeeCreditHash, CloseFeeCredit);
 
-const reclaimFeeCreditTransactionOrder = await UnsignedReclaimFeeCreditTransactionOrder.create({
+const reclaimFeeCreditTransactionOrder = await ReclaimFeeCredit.create({
   proof: closeFeeCreditProof,
   bill: bill,
   version: 1n,
@@ -57,6 +52,4 @@ const reclaimFeeCreditTransactionOrder = await UnsignedReclaimFeeCreditTransacti
 }).sign(proofFactory);
 const reclaimFeeCreditHash = await client.sendTransaction(reclaimFeeCreditTransactionOrder);
 
-console.log(
-  (await client.waitTransactionProof(reclaimFeeCreditHash, ReclaimFeeCreditTransactionRecordWithProof)).toString(),
-);
+console.log((await client.waitTransactionProof(reclaimFeeCreditHash, ReclaimFeeCredit)).toString());

@@ -1,6 +1,5 @@
 import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditRecord.js';
-import { UnlockFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/UnlockFeeCreditTransactionRecordWithProof.js';
-import { UnsignedUnlockFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedUnlockFeeCreditTransactionOrder.js';
+import { UnlockFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnlockFeeCredit.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -23,7 +22,7 @@ const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCredit
 console.log(feeCreditRecord.toString());
 
 console.log('Unlocking fee credit...');
-const unlockFeeCreditTransactionOrder = await UnsignedUnlockFeeCreditTransactionOrder.create({
+const unlockFeeCreditTransactionOrder = await UnlockFeeCredit.create({
   feeCredit: feeCreditRecord,
   version: 1n,
   networkIdentifier: NetworkIdentifier.LOCAL,
@@ -34,6 +33,4 @@ const unlockFeeCreditTransactionOrder = await UnsignedUnlockFeeCreditTransaction
 
 const unlockFeeCreditHash = await client.sendTransaction(unlockFeeCreditTransactionOrder);
 
-console.log(
-  (await client.waitTransactionProof(unlockFeeCreditHash, UnlockFeeCreditTransactionRecordWithProof)).toString(),
-);
+console.log((await client.waitTransactionProof(unlockFeeCreditHash, UnlockFeeCredit)).toString());

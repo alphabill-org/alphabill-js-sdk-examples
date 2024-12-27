@@ -1,6 +1,5 @@
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { TransferBillTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/TransferBillTransactionRecordWithProof.js';
-import { UnsignedTransferBillTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnsignedTransferBillTransactionOrder.js';
+import { TransferBill } from '@alphabill/alphabill-js-sdk/lib/money/transactions/TransferBill.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -26,7 +25,7 @@ const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
 console.log(bill.toString());
 
-const transferBillTransactionOrder = await UnsignedTransferBillTransactionOrder.create({
+const transferBillTransactionOrder = await TransferBill.create({
   ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
   bill: bill,
   version: 1n,
@@ -37,4 +36,4 @@ const transferBillTransactionOrder = await UnsignedTransferBillTransactionOrder.
 }).sign(proofFactory, proofFactory);
 const transferBillHash = await client.sendTransaction(transferBillTransactionOrder);
 
-console.log((await client.waitTransactionProof(transferBillHash, TransferBillTransactionRecordWithProof)).toString());
+console.log((await client.waitTransactionProof(transferBillHash, TransferBill)).toString());

@@ -3,12 +3,11 @@ import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/D
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { TokenIcon } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenIcon.js';
 import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
-import { CreateFungibleTokenTypeTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/CreateFungibleTokenTypeTransactionRecordWithProof.js';
-import { UnsignedCreateFungibleTokenTypeTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedCreateFungibleTokenTypeTransactionOrder.js';
+import { CreateFungibleTokenType } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/CreateFungibleTokenType.js';
+import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/tokens/UnitIdWithType.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
-import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/transaction/UnitIdWithType.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
@@ -24,7 +23,7 @@ const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicK
 const round = await client.getRoundNumber();
 const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), TokenPartitionUnitType.FUNGIBLE_TOKEN_TYPE);
 
-const createFungibleTokenTypeTransactionOrder = await UnsignedCreateFungibleTokenTypeTransactionOrder.create({
+const createFungibleTokenTypeTransactionOrder = await CreateFungibleTokenType.create({
   type: { unitId: tokenTypeUnitId },
   symbol: 'E',
   name: 'Big money come',
@@ -42,8 +41,4 @@ const createFungibleTokenTypeTransactionOrder = await UnsignedCreateFungibleToke
 }).sign(proofFactory, []);
 const createFungibleTokenTypeHash = await client.sendTransaction(createFungibleTokenTypeTransactionOrder);
 
-console.log(
-  (
-    await client.waitTransactionProof(createFungibleTokenTypeHash, CreateFungibleTokenTypeTransactionRecordWithProof)
-  ).toString(),
-);
+console.log((await client.waitTransactionProof(createFungibleTokenTypeHash, CreateFungibleTokenType)).toString());

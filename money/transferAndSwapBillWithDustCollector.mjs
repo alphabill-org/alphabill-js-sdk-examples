@@ -1,8 +1,6 @@
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { SwapBillsWithDustCollectorTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/SwapBillsWithDustCollectorTransactionRecordWithProof.js';
-import { TransferBillToDustCollectorTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/TransferBillToDustCollectorTransactionRecordWithProof.js';
-import { UnsignedSwapBillsWithDustCollectorTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnsignedSwapBillsWithDustCollectorTransactionOrder.js';
-import { UnsignedTransferBillToDustCollectorTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnsignedTransferBillToDustCollectorTransactionOrder.js';
+import { SwapBillsWithDustCollector } from '@alphabill/alphabill-js-sdk/lib/money/transactions/SwapBillsWithDustCollector.js';
+import { TransferBillToDustCollector } from '@alphabill/alphabill-js-sdk/lib/money/transactions/TransferBillToDustCollector.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -33,7 +31,7 @@ console.log(bill.toString());
 console.log('Target ' + targetBill.toString());
 
 console.log('Transferring bill to dust collector...');
-const transferBillToDustCollectorTransactionOrder = await UnsignedTransferBillToDustCollectorTransactionOrder.create({
+const transferBillToDustCollectorTransactionOrder = await TransferBillToDustCollector.create({
   bill: bill,
   targetBill: targetBill,
   version: 1n,
@@ -45,11 +43,11 @@ const transferBillToDustCollectorTransactionOrder = await UnsignedTransferBillTo
 const transferBillToDustCollectorHash = await client.sendTransaction(transferBillToDustCollectorTransactionOrder);
 const transferBillToDustCollectorProof = await client.waitTransactionProof(
   transferBillToDustCollectorHash,
-  TransferBillToDustCollectorTransactionRecordWithProof,
+  TransferBillToDustCollector,
 );
 
 console.log('Swapping bill with dust collector...');
-const swapBillWithDustCollectorTransactionOrder = await UnsignedSwapBillsWithDustCollectorTransactionOrder.create({
+const swapBillWithDustCollectorTransactionOrder = await SwapBillsWithDustCollector.create({
   bill: targetBill,
   proofs: [transferBillToDustCollectorProof],
   version: 1n,
@@ -60,11 +58,4 @@ const swapBillWithDustCollectorTransactionOrder = await UnsignedSwapBillsWithDus
 }).sign(proofFactory, proofFactory);
 const swapBillsWithDustCollectorHash = await client.sendTransaction(swapBillWithDustCollectorTransactionOrder);
 
-console.log(
-  (
-    await client.waitTransactionProof(
-      swapBillsWithDustCollectorHash,
-      SwapBillsWithDustCollectorTransactionRecordWithProof,
-    )
-  ).toString(),
-);
+console.log((await client.waitTransactionProof(swapBillsWithDustCollectorHash, SwapBillsWithDustCollector)).toString());
