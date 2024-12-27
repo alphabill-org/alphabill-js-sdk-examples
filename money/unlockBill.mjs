@@ -1,6 +1,5 @@
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { UnlockBillTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnlockBillTransactionRecordWithProof.js';
-import { UnsignedUnlockBillTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnsignedUnlockBillTransactionOrder.js';
+import { UnlockBill } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnlockBill.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -25,7 +24,7 @@ const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
 console.log(bill.toString());
 
-const unlockBillTransactionOrder = await UnsignedUnlockBillTransactionOrder.create({
+const unlockBillTransactionOrder = await UnlockBill.create({
   bill: bill,
   version: 1n,
   networkIdentifier: NetworkIdentifier.LOCAL,
@@ -34,4 +33,4 @@ const unlockBillTransactionOrder = await UnsignedUnlockBillTransactionOrder.crea
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, proofFactory);
 const unlockBillHash = await client.sendTransaction(unlockBillTransactionOrder);
-console.log((await client.waitTransactionProof(unlockBillHash, UnlockBillTransactionRecordWithProof)).toString());
+console.log((await client.waitTransactionProof(unlockBillHash, UnlockBill)).toString());

@@ -1,6 +1,5 @@
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { SplitBillTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/money/transactions/SplitBillTransactionRecordWithProof.js';
-import { UnsignedSplitBillTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnsignedSplitBillTransactionOrder.js';
+import { SplitBill } from '@alphabill/alphabill-js-sdk/lib/money/transactions/SplitBill.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -27,7 +26,7 @@ const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
 console.log(bill.toString());
 
-const splitBillTransactionOrder = await UnsignedSplitBillTransactionOrder.create({
+const splitBillTransactionOrder = await SplitBill.create({
   splits: [
     { value: 2n, ownerPredicate: ownerPredicate },
     { value: 1n, ownerPredicate: ownerPredicate },
@@ -41,4 +40,4 @@ const splitBillTransactionOrder = await UnsignedSplitBillTransactionOrder.create
 }).sign(proofFactory, proofFactory);
 const splitBillHash = await client.sendTransaction(splitBillTransactionOrder);
 
-console.log((await client.waitTransactionProof(splitBillHash, SplitBillTransactionRecordWithProof)).toString());
+console.log((await client.waitTransactionProof(splitBillHash, SplitBill)).toString());

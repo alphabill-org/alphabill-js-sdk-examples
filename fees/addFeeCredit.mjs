@@ -1,7 +1,5 @@
-import { AddFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/AddFeeCreditTransactionRecordWithProof.js';
-import { TransferFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/TransferFeeCreditTransactionRecordWithProof.js';
-import { UnsignedAddFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedAddFeeCreditTransactionOrder.js';
-import { UnsignedTransferFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedTransferFeeCreditTransactionOrder.js';
+import { AddFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/AddFeeCredit.js';
+import { TransferFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/TransferFeeCredit.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { PartitionIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionIdentifier.js';
@@ -46,7 +44,7 @@ for (const { client, partitionIdentifier } of partitions) {
   const round = await moneyClient.getRoundNumber();
   const ownerPredicate = await PayToPublicKeyHashPredicate.create(signingService.publicKey);
 
-  const transferFeeCreditTransactionOrder = await UnsignedTransferFeeCreditTransactionOrder.create({
+  const transferFeeCreditTransactionOrder = await TransferFeeCredit.create({
     amount: 100n,
     targetPartitionIdentifier: partitionIdentifier,
     latestAdditionTime: round + 60n,
@@ -60,13 +58,10 @@ for (const { client, partitionIdentifier } of partitions) {
   }).sign(proofFactory);
   const transferFeeCreditHash = await moneyClient.sendTransaction(transferFeeCreditTransactionOrder);
 
-  const transferFeeCreditProof = await moneyClient.waitTransactionProof(
-    transferFeeCreditHash,
-    TransferFeeCreditTransactionRecordWithProof,
-  );
+  const transferFeeCreditProof = await moneyClient.waitTransactionProof(transferFeeCreditHash, TransferFeeCredit);
   const feeCreditRecordId = transferFeeCreditTransactionOrder.payload.attributes.targetUnitId;
 
-  const addFeeCreditTransactionOrder = await UnsignedAddFeeCreditTransactionOrder.create({
+  const addFeeCreditTransactionOrder = await AddFeeCredit.create({
     targetPartitionIdentifier: partitionIdentifier,
     ownerPredicate: ownerPredicate,
     proof: transferFeeCreditProof,
@@ -79,5 +74,5 @@ for (const { client, partitionIdentifier } of partitions) {
   }).sign(proofFactory);
   const addFeeCreditHash = await client.sendTransaction(addFeeCreditTransactionOrder);
 
-  console.log((await client.waitTransactionProof(addFeeCreditHash, AddFeeCreditTransactionRecordWithProof)).toString());
+  console.log((await client.waitTransactionProof(addFeeCreditHash, AddFeeCredit)).toString());
 }

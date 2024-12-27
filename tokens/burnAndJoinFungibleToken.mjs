@@ -2,12 +2,9 @@ import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdenti
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { FungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/FungibleToken.js';
-import { BurnFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/BurnFungibleTokenTransactionRecordWithProof.js';
-import { JoinFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/JoinFungibleTokenTransactionRecordWithProof.js';
-import { SplitFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/SplitFungibleTokenTransactionRecordWithProof.js';
-import { UnsignedBurnFungibleTokenTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedBurnFungibleTokenTransactionOrder.js';
-import { UnsignedJoinFungibleTokenTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedJoinFungibleTokenTransactionOrder.js';
-import { UnsignedSplitFungibleTokenTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedSplitFungibleTokenTransactionOrder.js';
+import { BurnFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/BurnFungibleToken.js';
+import { JoinFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/JoinFungibleToken.js';
+import { SplitFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/SplitFungibleToken.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
@@ -33,7 +30,7 @@ const token = await client.getUnit(tokenId, false, FungibleToken);
 
 // 1. split the fungible token
 console.log("Original token's value before split: " + token.value);
-const splitFungibleTokenTransactionOrder = await UnsignedSplitFungibleTokenTransactionOrder.create({
+const splitFungibleTokenTransactionOrder = await SplitFungibleToken.create({
   token: token,
   ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
   amount: 1n,
@@ -47,10 +44,7 @@ const splitFungibleTokenTransactionOrder = await UnsignedSplitFungibleTokenTrans
 const splitFungibleTokenHash = await client.sendTransaction(splitFungibleTokenTransactionOrder);
 
 // 1b. wait for transaction to finalize
-const splitFungibleTokenProof = await client.waitTransactionProof(
-  splitFungibleTokenHash,
-  SplitFungibleTokenTransactionRecordWithProof,
-);
+const splitFungibleTokenProof = await client.waitTransactionProof(splitFungibleTokenHash, SplitFungibleToken);
 
 // 2. find the token that was split
 console.log(splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnitIds);
@@ -67,7 +61,7 @@ const originalTokenAfterSplit = await client.getUnit(tokenId, false, FungibleTok
 console.log("Original token's value after split: " + originalTokenAfterSplit.value);
 
 // 4. burn the split token using original fungible token as target
-const burnFungibleTokenTransactionOrder = await UnsignedBurnFungibleTokenTransactionOrder.create({
+const burnFungibleTokenTransactionOrder = await BurnFungibleToken.create({
   type: { unitId: splitToken.typeId },
   token: splitToken,
   targetToken: originalTokenAfterSplit,
@@ -78,13 +72,10 @@ const burnFungibleTokenTransactionOrder = await UnsignedBurnFungibleTokenTransac
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const burnFungibleTokenHash = await client.sendTransaction(burnFungibleTokenTransactionOrder);
-const burnFungibleTokenProof = await client.waitTransactionProof(
-  burnFungibleTokenHash,
-  BurnFungibleTokenTransactionRecordWithProof,
-);
+const burnFungibleTokenProof = await client.waitTransactionProof(burnFungibleTokenHash, BurnFungibleToken);
 
 // 5. join the split token back into the original fungible token
-const joinFungibleTokenTransactionOrder = await UnsignedJoinFungibleTokenTransactionOrder.create({
+const joinFungibleTokenTransactionOrder = await JoinFungibleToken.create({
   token: originalTokenAfterSplit,
   proofs: [burnFungibleTokenProof],
   version: 1n,
@@ -96,7 +87,7 @@ const joinFungibleTokenTransactionOrder = await UnsignedJoinFungibleTokenTransac
 const joinFungibleTokenHash = await client.sendTransaction(joinFungibleTokenTransactionOrder);
 
 // 5b. wait for transaction to finalize
-await client.waitTransactionProof(joinFungibleTokenHash, JoinFungibleTokenTransactionRecordWithProof);
+await client.waitTransactionProof(joinFungibleTokenHash, JoinFungibleToken);
 
 // 6. check that the original tokens value has been increased
 const originalTokenAfterJoin = await client.getUnit(tokenId, false, FungibleToken);

@@ -1,6 +1,5 @@
 import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditRecord.js';
-import { LockFeeCreditTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/records/LockFeeCreditTransactionRecordWithProof.js';
-import { UnsignedLockFeeCreditTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnsignedLockFeeCreditTransactionOrder.js';
+import { LockFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/LockFeeCredit.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -22,7 +21,7 @@ const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCredit
 console.log(feeCreditRecord.toString());
 
 console.log('Locking fee credit...');
-const lockFeeCreditTransactionOrder = await UnsignedLockFeeCreditTransactionOrder.create({
+const lockFeeCreditTransactionOrder = await LockFeeCredit.create({
   status: 5n,
   feeCredit: feeCreditRecord,
   version: 1n,
@@ -33,4 +32,4 @@ const lockFeeCreditTransactionOrder = await UnsignedLockFeeCreditTransactionOrde
 }).sign(proofFactory);
 
 const lockFeeCreditHash = await client.sendTransaction(lockFeeCreditTransactionOrder);
-console.log((await client.waitTransactionProof(lockFeeCreditHash, LockFeeCreditTransactionRecordWithProof)).toString());
+console.log((await client.waitTransactionProof(lockFeeCreditHash, LockFeeCredit)).toString());

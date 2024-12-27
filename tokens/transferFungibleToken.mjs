@@ -2,8 +2,7 @@ import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdenti
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { FungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/FungibleToken.js';
-import { TransferFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/TransferFungibleTokenTransactionRecordWithProof.js';
-import { UnsignedTransferFungibleTokenTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedTransferFungibleTokenTransactionOrder.js';
+import { TransferFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/TransferFungibleToken.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
@@ -30,7 +29,7 @@ if (token === null) {
   throw new Error('Token does not exist');
 }
 
-const transferFungibleTokenTransactionOrder = await UnsignedTransferFungibleTokenTransactionOrder.create({
+const transferFungibleTokenTransactionOrder = await TransferFungibleToken.create({
   token: token,
   ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
   type: { unitId: token.typeId },
@@ -43,8 +42,4 @@ const transferFungibleTokenTransactionOrder = await UnsignedTransferFungibleToke
 
 const transferFungibleTokenHash = await client.sendTransaction(transferFungibleTokenTransactionOrder);
 
-console.log(
-  (
-    await client.waitTransactionProof(transferFungibleTokenHash, TransferFungibleTokenTransactionRecordWithProof)
-  ).toString(),
-);
+console.log((await client.waitTransactionProof(transferFungibleTokenHash, TransferFungibleToken)).toString());

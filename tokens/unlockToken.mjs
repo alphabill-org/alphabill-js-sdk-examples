@@ -2,8 +2,7 @@ import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdenti
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { FungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/FungibleToken.js';
-import { UnlockTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnlockTokenTransactionRecordWithProof.js';
-import { UnsignedUnlockTokenTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedUnlockTokenTransactionOrder.js';
+import { UnlockToken } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnlockToken.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
@@ -24,7 +23,7 @@ const feeCreditRecordId = units.feeCreditRecords.at(0);
 const round = await client.getRoundNumber();
 const token = await client.getUnit(tokenId, false, FungibleToken);
 
-const unlockFungibleTokenTransactionOrder = await UnsignedUnlockTokenTransactionOrder.create({
+const unlockFungibleTokenTransactionOrder = await UnlockToken.create({
   token: {
     unitId: token.unitId,
     counter: token.counter,
@@ -37,6 +36,4 @@ const unlockFungibleTokenTransactionOrder = await UnsignedUnlockTokenTransaction
 }).sign(proofFactory, proofFactory);
 const unlockFungibleTokenHash = await client.sendTransaction(unlockFungibleTokenTransactionOrder);
 
-console.log(
-  (await client.waitTransactionProof(unlockFungibleTokenHash, UnlockTokenTransactionRecordWithProof)).toString(),
-);
+console.log((await client.waitTransactionProof(unlockFungibleTokenHash, UnlockToken)).toString());

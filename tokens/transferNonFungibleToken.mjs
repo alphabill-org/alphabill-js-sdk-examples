@@ -2,8 +2,7 @@ import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdenti
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { NonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleToken.js';
-import { TransferNonFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/TransferNonFungibleTokenTransactionRecordWithProof.js';
-import { UnsignedTransferNonFungibletokenTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedTransferNonFungibletokenTransactionOrder.js';
+import { TransferNonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/TransferNonFungibleToken.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
@@ -30,7 +29,7 @@ if (token === null) {
   throw new Error('Token does not exist');
 }
 
-const transferNonFungibleTokenTransactionOrder = await UnsignedTransferNonFungibletokenTransactionOrder.create({
+const transferNonFungibleTokenTransactionOrder = await TransferNonFungibleToken.create({
   token: token,
   counter: token.counter,
   ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
@@ -44,8 +43,4 @@ const transferNonFungibleTokenTransactionOrder = await UnsignedTransferNonFungib
 }).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const transferNonFungibleTokenHash = await client.sendTransaction(transferNonFungibleTokenTransactionOrder);
 
-console.log(
-  (
-    await client.waitTransactionProof(transferNonFungibleTokenHash, TransferNonFungibleTokenTransactionRecordWithProof)
-  ).toString(),
-);
+console.log((await client.waitTransactionProof(transferNonFungibleTokenHash, TransferNonFungibleToken)).toString());

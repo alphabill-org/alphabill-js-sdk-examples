@@ -4,8 +4,7 @@ import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/D
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { NonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleToken.js';
 import { NonFungibleTokenData } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleTokenData.js';
-import { UnsignedUpdateNonFungibleTokenTransactionOrder } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UnsignedUpdateNonFungibleTokenTransactionOrder.js';
-import { UpdateNonFungibleTokenTransactionRecordWithProof } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UpdateNonFungibleTokenTransactionRecordWithProof.js';
+import { UpdateNonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/transactions/UpdateNonFungibleToken.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { AlwaysTrueProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/AlwaysTrueProofFactory.js';
@@ -28,7 +27,7 @@ const feeCreditRecordId = units.feeCreditRecords.at(0);
 const round = await client.getRoundNumber();
 const token = await client.getUnit(tokenId, false, NonFungibleToken);
 
-const updateNonFungibleTokenTransactionOrder = await UnsignedUpdateNonFungibleTokenTransactionOrder.create({
+const updateNonFungibleTokenTransactionOrder = await UpdateNonFungibleToken.create({
   token: token,
   data: await NonFungibleTokenData.create([crypto.getRandomValues(new Uint8Array(32))]),
   version: 1n,
@@ -39,8 +38,4 @@ const updateNonFungibleTokenTransactionOrder = await UnsignedUpdateNonFungibleTo
 }).sign(alwaysTrueProofFactory, proofFactory, [alwaysTrueProofFactory]);
 const updateNonFungibleTokenHash = await client.sendTransaction(updateNonFungibleTokenTransactionOrder);
 
-console.log(
-  (
-    await client.waitTransactionProof(updateNonFungibleTokenHash, UpdateNonFungibleTokenTransactionRecordWithProof)
-  ).toString(),
-);
+console.log((await client.waitTransactionProof(updateNonFungibleTokenHash, UpdateNonFungibleToken)).toString());
