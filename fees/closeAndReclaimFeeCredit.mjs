@@ -8,6 +8,7 @@ import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateAp
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { TransactionStatus } from '@alphabill/alphabill-js-sdk/lib/transaction/record/TransactionStatus.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 import config from '../config.js';
 
@@ -29,6 +30,7 @@ const bill = await client.getUnit(targetBillId, false, Bill);
 const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCreditRecord);
 const round = await client.getRoundNumber();
 
+console.log(`Closing fee credit with ID ${feeCreditRecordId}`);
 const closeFeeCreditTransactionOrder = await CloseFeeCredit.create({
   bill: bill,
   feeCreditRecord: feeCreditRecord,
@@ -40,7 +42,13 @@ const closeFeeCreditTransactionOrder = await CloseFeeCredit.create({
 }).sign(proofFactory);
 const closeFeeCreditHash = await client.sendTransaction(closeFeeCreditTransactionOrder);
 const closeFeeCreditProof = await client.waitTransactionProof(closeFeeCreditHash, CloseFeeCredit);
+console.log(
+  `Closing fee credit response - ${TransactionStatus[closeFeeCreditProof.transactionRecord.serverMetadata.successIndicator]}`,
+);
 
+console.log('----------------------------------------------------------------------------------------');
+
+console.log(`Reclaiming fee credit with ID ${feeCreditRecordId}`);
 const reclaimFeeCreditTransactionOrder = await ReclaimFeeCredit.create({
   proof: closeFeeCreditProof,
   bill: bill,
@@ -51,5 +59,7 @@ const reclaimFeeCreditTransactionOrder = await ReclaimFeeCredit.create({
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory);
 const reclaimFeeCreditHash = await client.sendTransaction(reclaimFeeCreditTransactionOrder);
-
-console.log((await client.waitTransactionProof(reclaimFeeCreditHash, ReclaimFeeCredit)).toString());
+const reclaimFeeCreditProof = await client.waitTransactionProof(reclaimFeeCreditHash, ReclaimFeeCredit);
+console.log(
+  `Reclaiming fee credit response - ${TransactionStatus[reclaimFeeCreditProof.transactionRecord.serverMetadata.successIndicator]}`,
+);
