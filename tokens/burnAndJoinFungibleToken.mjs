@@ -10,6 +10,7 @@ import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { AlwaysTrueProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/AlwaysTrueProofFactory.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { TransactionStatus } from '@alphabill/alphabill-js-sdk/lib/transaction/record/TransactionStatus.js';
 import { UnitId } from '@alphabill/alphabill-js-sdk/lib/UnitId.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 import config from '../config.js';
@@ -26,10 +27,9 @@ const units = await client.getUnitsByOwnerId(signingService.publicKey);
 const tokenId = units.fungibleTokens.at(0);
 const feeCreditRecordId = units.feeCreditRecords.at(0);
 const round = await client.getRoundNumber();
-const token = await client.getUnit(tokenId, false, FungibleToken);
+let token = await client.getUnit(tokenId, false, FungibleToken);
 
-// 1. split the fungible token
-console.log("Original token's value before split: " + token.value);
+console.log(`Splitting fungible token with ID ${tokenId} and value ${token.value}`);
 const splitFungibleTokenTransactionOrder = await SplitFungibleToken.create({
   token: token,
   ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
@@ -42,29 +42,26 @@ const splitFungibleTokenTransactionOrder = await SplitFungibleToken.create({
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const splitFungibleTokenHash = await client.sendTransaction(splitFungibleTokenTransactionOrder);
-
-// 1b. wait for transaction to finalize
 const splitFungibleTokenProof = await client.waitTransactionProof(splitFungibleTokenHash, SplitFungibleToken);
+console.log(
+  `Split fungible token response - ${TransactionStatus[splitFungibleTokenProof.transactionRecord.serverMetadata.successIndicator]}`,
+);
 
-// 2. find the token that was split
-console.log(splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnitIds);
+console.log('----------------------------------------------------------------------------------------');
+
 const splitTokenId = splitFungibleTokenProof.transactionRecord.serverMetadata.targetUnitIds.find(
   (id) => !UnitId.equals(id, token.unitId),
 );
-
 const splitToken = await client.getUnit(splitTokenId, false, FungibleToken);
-console.log('Split token ID: ' + Base16Converter.encode(splitTokenId.bytes));
-console.log('Split token value: ' + splitToken.value);
+console.log(`Found split token with ID ${splitTokenId} and value ${splitToken.value}`);
 
-// 3. check that the original tokens value has been reduced
-const originalTokenAfterSplit = await client.getUnit(tokenId, false, FungibleToken);
-console.log("Original token's value after split: " + originalTokenAfterSplit.value);
+token = await client.getUnit(tokenId, false, FungibleToken);
 
-// 4. burn the split token using original fungible token as target
+console.log(`Burning fungible token with ID ${splitTokenId}`);
 const burnFungibleTokenTransactionOrder = await BurnFungibleToken.create({
   type: { unitId: splitToken.typeId },
   token: splitToken,
-  targetToken: originalTokenAfterSplit,
+  targetToken: token,
   version: 1n,
   networkIdentifier: NetworkIdentifier.LOCAL,
   stateLock: null,
@@ -73,10 +70,15 @@ const burnFungibleTokenTransactionOrder = await BurnFungibleToken.create({
 }).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const burnFungibleTokenHash = await client.sendTransaction(burnFungibleTokenTransactionOrder);
 const burnFungibleTokenProof = await client.waitTransactionProof(burnFungibleTokenHash, BurnFungibleToken);
+console.log(
+  `Burn fungible token response - ${TransactionStatus[burnFungibleTokenProof.transactionRecord.serverMetadata.successIndicator]}`,
+);
 
-// 5. join the split token back into the original fungible token
+console.log('----------------------------------------------------------------------------------------');
+
+console.log(`Joining fungible token with ID ${splitTokenId} into original token with ID ${tokenId}`);
 const joinFungibleTokenTransactionOrder = await JoinFungibleToken.create({
-  token: originalTokenAfterSplit,
+  token: token,
   proofs: [burnFungibleTokenProof],
   version: 1n,
   networkIdentifier: NetworkIdentifier.LOCAL,
@@ -85,10 +87,7 @@ const joinFungibleTokenTransactionOrder = await JoinFungibleToken.create({
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const joinFungibleTokenHash = await client.sendTransaction(joinFungibleTokenTransactionOrder);
-
-// 5b. wait for transaction to finalize
-await client.waitTransactionProof(joinFungibleTokenHash, JoinFungibleToken);
-
-// 6. check that the original tokens value has been increased
-const originalTokenAfterJoin = await client.getUnit(tokenId, false, FungibleToken);
-console.log("Original token's value after join: " + originalTokenAfterJoin.value);
+const joinFungibleTokenProof = await client.waitTransactionProof(joinFungibleTokenHash, JoinFungibleToken);
+console.log(
+  `Join fungible token response - ${TransactionStatus[joinFungibleTokenProof.transactionRecord.serverMetadata.successIndicator]}`,
+);

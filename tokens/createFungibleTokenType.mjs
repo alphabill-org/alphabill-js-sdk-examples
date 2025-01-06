@@ -8,6 +8,7 @@ import { UnitIdWithType } from '@alphabill/alphabill-js-sdk/lib/tokens/UnitIdWit
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { TransactionStatus } from '@alphabill/alphabill-js-sdk/lib/transaction/record/TransactionStatus.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
@@ -23,6 +24,7 @@ const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicK
 const round = await client.getRoundNumber();
 const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), TokenPartitionUnitType.FUNGIBLE_TOKEN_TYPE);
 
+console.log(`Creating fungible token type with unit ID ${tokenTypeUnitId}`);
 const createFungibleTokenTypeTransactionOrder = await CreateFungibleTokenType.create({
   type: { unitId: tokenTypeUnitId },
   symbol: 'E',
@@ -40,5 +42,10 @@ const createFungibleTokenTypeTransactionOrder = await CreateFungibleTokenType.cr
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, []);
 const createFungibleTokenTypeHash = await client.sendTransaction(createFungibleTokenTypeTransactionOrder);
-
-console.log((await client.waitTransactionProof(createFungibleTokenTypeHash, CreateFungibleTokenType)).toString());
+const createFungibleTokenTypeProof = await client.waitTransactionProof(
+  createFungibleTokenTypeHash,
+  CreateFungibleTokenType,
+);
+console.log(
+  `Create fungible token type response - ${TransactionStatus[createFungibleTokenTypeProof.transactionRecord.serverMetadata.successIndicator]}`,
+);

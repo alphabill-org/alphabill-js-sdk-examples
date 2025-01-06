@@ -7,6 +7,7 @@ import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/Clie
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { TransactionStatus } from '@alphabill/alphabill-js-sdk/lib/transaction/record/TransactionStatus.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
@@ -24,13 +25,17 @@ const feeCreditRecordId = units.feeCreditRecords.at(0);
 const billId = units.bills.at(0);
 const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
-console.log(bill.toString());
+
+console.log(`Splitting bill with ID ${bill.unitId}`);
+
+// in example, new bill's owner is same for ease of use. change here if needed.
+const newOwnerPredicate = ownerPredicate;
+const splitBill1 = { value: 2n, ownerPredicate: newOwnerPredicate };
+const splitBill2 = { value: 1n, ownerPredicate: newOwnerPredicate };
+const splits = [splitBill1, splitBill2];
 
 const splitBillTransactionOrder = await SplitBill.create({
-  splits: [
-    { value: 2n, ownerPredicate: ownerPredicate },
-    { value: 1n, ownerPredicate: ownerPredicate },
-  ],
+  splits: splits,
   bill: bill,
   version: 1n,
   networkIdentifier: NetworkIdentifier.LOCAL,
@@ -39,5 +44,7 @@ const splitBillTransactionOrder = await SplitBill.create({
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, proofFactory);
 const splitBillHash = await client.sendTransaction(splitBillTransactionOrder);
-
-console.log((await client.waitTransactionProof(splitBillHash, SplitBill)).toString());
+const splitBillProof = await client.waitTransactionProof(splitBillHash, SplitBill);
+console.log(
+  `Split bill response - ${TransactionStatus[splitBillProof.transactionRecord.serverMetadata.successIndicator]}`,
+);

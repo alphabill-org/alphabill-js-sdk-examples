@@ -7,6 +7,7 @@ import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/Clie
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { TransactionStatus } from '@alphabill/alphabill-js-sdk/lib/transaction/record/TransactionStatus.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
@@ -23,10 +24,14 @@ const feeCreditRecordId = units.feeCreditRecords.at(0);
 const billId = units.bills.at(0);
 const round = await client.getRoundNumber();
 const bill = await client.getUnit(billId, false, Bill);
-console.log(bill.toString());
+
+console.log(`Transferring bill with ID ${bill.unitId}`);
+
+// in example, transferred to self for ease of use. change here if needed.
+const newOwnerPredicate = await PayToPublicKeyHashPredicate.create(signingService.publicKey);
 
 const transferBillTransactionOrder = await TransferBill.create({
-  ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
+  ownerPredicate: newOwnerPredicate,
   bill: bill,
   version: 1n,
   networkIdentifier: NetworkIdentifier.LOCAL,
@@ -35,5 +40,7 @@ const transferBillTransactionOrder = await TransferBill.create({
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, proofFactory);
 const transferBillHash = await client.sendTransaction(transferBillTransactionOrder);
-
-console.log((await client.waitTransactionProof(transferBillHash, TransferBill)).toString());
+const transferBillProof = await client.waitTransactionProof(transferBillHash, TransferBill);
+console.log(
+  `Transfer bill response - ${TransactionStatus[transferBillProof.transactionRecord.serverMetadata.successIndicator]}`,
+);

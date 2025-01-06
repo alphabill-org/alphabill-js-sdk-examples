@@ -7,6 +7,7 @@ import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateAp
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
 import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/AlwaysTruePredicate.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { TransactionStatus } from '@alphabill/alphabill-js-sdk/lib/transaction/record/TransactionStatus.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
@@ -25,12 +26,13 @@ const billUnitIds = units.bills;
 const bill = await client.getUnit(billUnitIds.at(0), false, Bill);
 const targetBill = await client.getUnit(billUnitIds.at(1), false, Bill);
 if (!bill || !targetBill) {
-  throw new Error('No bills available');
+  throw new Error('Two bills are needed for the transaction.');
 }
-console.log(bill.toString());
-console.log('Target ' + targetBill.toString());
 
-console.log('Transferring bill to dust collector...');
+console.log(
+  `Transferring bill with ID ${bill.unitId} to dust collector with target bill's ID set to ${targetBill.unitId}`,
+);
+
 const transferBillToDustCollectorTransactionOrder = await TransferBillToDustCollector.create({
   bill: bill,
   targetBill: targetBill,
@@ -45,8 +47,13 @@ const transferBillToDustCollectorProof = await client.waitTransactionProof(
   transferBillToDustCollectorHash,
   TransferBillToDustCollector,
 );
+console.log(
+  `Transfer bill to dust collector response - ${TransactionStatus[transferBillToDustCollectorProof.transactionRecord.serverMetadata.successIndicator]}`,
+);
 
-console.log('Swapping bill with dust collector...');
+console.log('----------------------------------------------------------------------------------------');
+
+console.log(`Swapping transferred bill with dust collector`);
 const swapBillWithDustCollectorTransactionOrder = await SwapBillsWithDustCollector.create({
   bill: targetBill,
   proofs: [transferBillToDustCollectorProof],
@@ -57,5 +64,10 @@ const swapBillWithDustCollectorTransactionOrder = await SwapBillsWithDustCollect
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, proofFactory);
 const swapBillsWithDustCollectorHash = await client.sendTransaction(swapBillWithDustCollectorTransactionOrder);
-
-console.log((await client.waitTransactionProof(swapBillsWithDustCollectorHash, SwapBillsWithDustCollector)).toString());
+const swapBillsWithDustCollectorProof = await client.waitTransactionProof(
+  swapBillsWithDustCollectorHash,
+  SwapBillsWithDustCollector,
+);
+console.log(
+  `Swap bill with dust collector response - ${TransactionStatus[swapBillsWithDustCollectorProof.transactionRecord.serverMetadata.successIndicator]}`,
+);

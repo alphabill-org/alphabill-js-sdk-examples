@@ -8,6 +8,7 @@ import { AlwaysTruePredicate } from '@alphabill/alphabill-js-sdk/lib/transaction
 import { PayToPublicKeyHashPredicate } from '@alphabill/alphabill-js-sdk/lib/transaction/predicates/PayToPublicKeyHashPredicate.js';
 import { AlwaysTrueProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/AlwaysTrueProofFactory.js';
 import { PayToPublicKeyHashProofFactory } from '@alphabill/alphabill-js-sdk/lib/transaction/proofs/PayToPublicKeyHashProofFactory.js';
+import { TransactionStatus } from '@alphabill/alphabill-js-sdk/lib/transaction/record/TransactionStatus.js';
 import { Base16Converter } from '@alphabill/alphabill-js-sdk/lib/util/Base16Converter.js';
 
 import config from '../config.js';
@@ -29,11 +30,10 @@ if (token === null) {
   throw new Error('Token does not exist');
 }
 
+console.log(`Transferring fungible token with ID ${tokenId}`);
 const transferNonFungibleTokenTransactionOrder = await TransferNonFungibleToken.create({
   token: token,
-  counter: token.counter,
   ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
-  nonce: null,
   type: { unitId: token.typeId },
   version: 1n,
   networkIdentifier: NetworkIdentifier.LOCAL,
@@ -42,5 +42,10 @@ const transferNonFungibleTokenTransactionOrder = await TransferNonFungibleToken.
   stateUnlock: new AlwaysTruePredicate(),
 }).sign(proofFactory, proofFactory, [alwaysTrueProofFactory]);
 const transferNonFungibleTokenHash = await client.sendTransaction(transferNonFungibleTokenTransactionOrder);
-
-console.log((await client.waitTransactionProof(transferNonFungibleTokenHash, TransferNonFungibleToken)).toString());
+const transferNonFungibleTokenProof = await client.waitTransactionProof(
+  transferNonFungibleTokenHash,
+  TransferNonFungibleToken,
+);
+console.log(
+  `Transfer non-fungible token response - ${TransactionStatus[transferNonFungibleTokenProof.transactionRecord.serverMetadata.successIndicator]}`,
+);
