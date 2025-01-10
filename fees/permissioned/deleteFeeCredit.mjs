@@ -16,7 +16,7 @@ const proofFactory = new PayToPublicKeyHashProofFactory(signingService);
 const client = createTokenClient({
   transport: http(config.tokenPartitionUrl),
 });
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).feeCreditRecords.at(0);
 const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCreditRecord);
 

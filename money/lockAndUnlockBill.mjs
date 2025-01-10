@@ -22,7 +22,7 @@ const client = createMoneyClient({
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
 const billId = units.bills.at(0);
 const feeCreditRecordId = units.feeCreditRecords.at(0);
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 let bill = await client.getUnit(billId, false, Bill);
 
 // anything other than 0n means locked

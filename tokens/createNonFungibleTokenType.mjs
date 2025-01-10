@@ -20,7 +20,7 @@ const client = createTokenClient({
 });
 
 const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).feeCreditRecords.at(0);
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), TokenPartitionUnitType.NON_FUNGIBLE_TOKEN_TYPE);
 
 console.log(`Creating non-fungible token type with unit ID ${tokenTypeUnitId}`);

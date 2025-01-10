@@ -24,7 +24,7 @@ const client = createTokenClient({
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
 const tokenId = units.nonFungibleTokens.at(0);
 const feeCreditRecordId = units.feeCreditRecords.at(0);
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 const token = await client.getUnit(tokenId, false, NonFungibleToken);
 if (token === null) {
   throw new Error('Token does not exist');
