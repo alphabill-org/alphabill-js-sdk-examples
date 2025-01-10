@@ -42,7 +42,7 @@ const partitions = [
 
 for (const { client, partitionIdentifier } of partitions) {
   const bill = await moneyClient.getUnit(billIds[0], false, Bill);
-  const round = await moneyClient.getRoundNumber();
+  const round = (await moneyClient.getRoundInfo()).roundNumber;
   const ownerPredicate = await PayToPublicKeyHashPredicate.create(signingService.publicKey);
 
   const feeAmount = 100n;

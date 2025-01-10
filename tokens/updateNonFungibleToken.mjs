@@ -25,7 +25,7 @@ const client = createTokenClient({
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
 const tokenId = units.nonFungibleTokens.at(0);
 const feeCreditRecordId = units.feeCreditRecords.at(0);
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 const token = await client.getUnit(tokenId, false, NonFungibleToken);
 
 const newData = await NonFungibleTokenData.create(crypto.getRandomValues(new Uint8Array(32)));

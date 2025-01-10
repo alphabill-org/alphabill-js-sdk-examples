@@ -26,7 +26,7 @@ const client = createTokenClient({
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
 const tokenId = units.fungibleTokens.at(0);
 const feeCreditRecordId = units.feeCreditRecords.at(0);
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 let token = await client.getUnit(tokenId, false, FungibleToken);
 
 console.log(`Splitting fungible token with ID ${tokenId} and value ${token.value}`);

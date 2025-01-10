@@ -21,7 +21,7 @@ const client = createMoneyClient({
 
 const billIds = (await client.getUnitsByOwnerId(signingService.publicKey)).bills;
 const bill = await client.getUnit(billIds[0], false, Bill);
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 
 const transferFeeCreditTransactionOrder = await TransferFeeCredit.create({
   amount: 10n,

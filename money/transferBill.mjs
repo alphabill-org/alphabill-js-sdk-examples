@@ -22,7 +22,7 @@ const client = createMoneyClient({
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
 const feeCreditRecordId = units.feeCreditRecords.at(0);
 const billId = units.bills.at(0);
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 const bill = await client.getUnit(billId, false, Bill);
 
 console.log(`Transferring bill with ID ${bill.unitId}`);

@@ -19,7 +19,7 @@ const client = createMoneyClient({
   transport: http(config.moneyPartitionUrl),
 });
 
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
 const feeCreditRecordId = units.feeCreditRecords.at(0);
 const billUnitIds = units.bills;

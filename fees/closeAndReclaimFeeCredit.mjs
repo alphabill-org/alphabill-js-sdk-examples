@@ -28,7 +28,7 @@ if (!feeCreditRecordId) {
 
 const bill = await client.getUnit(targetBillId, false, Bill);
 const feeCreditRecord = await client.getUnit(feeCreditRecordId, false, FeeCreditRecord);
-const round = await client.getRoundNumber();
+const round = (await client.getRoundInfo()).roundNumber;
 
 console.log(`Closing fee credit with ID ${feeCreditRecordId}`);
 const closeFeeCreditTransactionOrder = await CloseFeeCredit.create({
