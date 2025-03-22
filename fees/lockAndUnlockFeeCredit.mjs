@@ -1,7 +1,6 @@
 import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditRecord.js';
 import { LockFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/LockFeeCredit.js';
 import { UnlockFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/UnlockFeeCredit.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -29,7 +28,7 @@ const lockFeeCreditTransactionOrder = await LockFeeCredit.create({
   status: lockStatus,
   feeCredit: feeCreditRecord,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
@@ -48,7 +47,7 @@ console.log(`Unlocking fee credit with ID ${feeCreditRecordId}, current lock sta
 const unlockFeeCreditTransactionOrder = await UnlockFeeCredit.create({
   feeCredit: feeCreditRecord,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

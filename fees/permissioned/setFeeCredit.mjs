@@ -1,5 +1,4 @@
 import { SetFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/SetFeeCredit.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { PartitionIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
@@ -41,7 +40,7 @@ const setFeeCreditTransactionOrder = await SetFeeCredit.create({
   amount: feeCreditAmount,
   feeCreditRecord: { unitId: fcrId, counter: fcrCounter },
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

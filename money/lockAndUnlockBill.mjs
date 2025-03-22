@@ -1,7 +1,6 @@
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { LockBill } from '@alphabill/alphabill-js-sdk/lib/money/transactions/LockBill.js';
 import { UnlockBill } from '@alphabill/alphabill-js-sdk/lib/money/transactions/UnlockBill.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -33,7 +32,7 @@ const lockBillTransactionOrder = await LockBill.create({
   status: lockStatus,
   bill: bill,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
@@ -53,7 +52,7 @@ console.log(`Unlocking bill with ID ${bill.unitId}, current lock status is ${bil
 const unlockBillTransactionOrder = await UnlockBill.create({
   bill: bill,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

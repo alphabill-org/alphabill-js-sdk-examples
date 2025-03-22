@@ -1,6 +1,5 @@
 import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditRecord.js';
 import { DeleteFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/DeleteFeeCredit.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -24,7 +23,7 @@ console.log(`Deleting fee credit with ID ${feeCreditRecordId}`);
 const deleteFeeCreditTransactionOrder = await DeleteFeeCredit.create({
   feeCredit: { unitId: feeCreditRecordId, counter: feeCreditRecord.counter },
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

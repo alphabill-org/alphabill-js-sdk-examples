@@ -1,7 +1,6 @@
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { SwapBillsWithDustCollector } from '@alphabill/alphabill-js-sdk/lib/money/transactions/SwapBillsWithDustCollector.js';
 import { TransferBillToDustCollector } from '@alphabill/alphabill-js-sdk/lib/money/transactions/TransferBillToDustCollector.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -37,7 +36,7 @@ const transferBillToDustCollectorTransactionOrder = await TransferBillToDustColl
   bill: bill,
   targetBill: targetBill,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
@@ -58,7 +57,7 @@ const swapBillWithDustCollectorTransactionOrder = await SwapBillsWithDustCollect
   bill: targetBill,
   proofs: [transferBillToDustCollectorProof],
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

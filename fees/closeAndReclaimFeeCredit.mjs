@@ -2,7 +2,6 @@ import { FeeCreditRecord } from '@alphabill/alphabill-js-sdk/lib/fees/FeeCreditR
 import { CloseFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/CloseFeeCredit.js';
 import { ReclaimFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/ReclaimFeeCredit.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -35,7 +34,7 @@ const closeFeeCreditTransactionOrder = await CloseFeeCredit.create({
   bill: bill,
   feeCreditRecord: feeCreditRecord,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
@@ -53,7 +52,7 @@ const reclaimFeeCreditTransactionOrder = await ReclaimFeeCredit.create({
   proof: closeFeeCreditProof,
   bill: bill,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
