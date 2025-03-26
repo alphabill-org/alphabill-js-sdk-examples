@@ -1,7 +1,6 @@
 import { AddFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/AddFeeCredit.js';
 import { TransferFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/TransferFeeCredit.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { PartitionIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -31,11 +30,11 @@ if (billIds.length === 0) {
 const partitions = [
   {
     client: moneyClient,
-    partitionIdentifier: PartitionIdentifier.MONEY,
+    partitionIdentifier: config.moneyPartitionIdentifier,
   },
   {
     client: tokenClient,
-    partitionIdentifier: PartitionIdentifier.TOKEN,
+    partitionIdentifier: config.tokenPartitionIdentifier,
   },
 ];
 
@@ -66,6 +65,7 @@ for (const { client, partitionIdentifier } of partitions) {
     bill,
     version: 1n,
     networkIdentifier: config.networkIdentifier,
+    partitionIdentifier: config.moneyPartitionIdentifier,
     stateLock: null,
     metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
     stateUnlock: new AlwaysTruePredicate(),
@@ -87,6 +87,7 @@ for (const { client, partitionIdentifier } of partitions) {
     feeCreditRecord: { unitId: feeCreditRecordId },
     version: 1n,
     networkIdentifier: config.networkIdentifier,
+    partitionIdentifier: config.moneyPartitionIdentifier,
     stateLock: null,
     metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
     stateUnlock: new AlwaysTruePredicate(),

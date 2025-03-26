@@ -33,6 +33,7 @@ const createFungibleTokenTransactionOrder = await CreateFungibleToken.create({
   nonce: 0n,
   version: 1n,
   networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: config.tokenPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
