@@ -13,13 +13,13 @@ const signingService = new DefaultSigningService(Base16Converter.decode(config.p
 const proofFactory = new PayToPublicKeyHashProofFactory(signingService);
 
 const client = createTokenClient({
-  transport: http(config.tokenPartitionUrl),
+  transport: http(config.permissionedTokenPartitionUrl),
 });
 const round = (await client.getRoundInfo()).roundNumber;
 
 const feeCreditAmount = 100n;
 const feeCreditOwnerPredicate = await PayToPublicKeyHashPredicate.create(signingService.publicKey);
-const partitionIdentifier = config.tokenPartitionIdentifier;
+const partitionIdentifier = config.permissionedTokenPartitionIdentifier;
 
 // if following variables are null, a new fee credit record is created.
 // in order to use existing fee credit record, use these variables.

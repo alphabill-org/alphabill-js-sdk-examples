@@ -13,7 +13,7 @@ const signingService = new DefaultSigningService(Base16Converter.decode(config.p
 const proofFactory = new PayToPublicKeyHashProofFactory(signingService);
 
 const client = createTokenClient({
-  transport: http(config.tokenPartitionUrl),
+  transport: http(config.permissionedTokenPartitionUrl),
 });
 const round = (await client.getRoundInfo()).roundNumber;
 const feeCreditRecordId = (await client.getUnitsByOwnerId(signingService.publicKey)).feeCreditRecords.at(0);
@@ -24,7 +24,7 @@ const deleteFeeCreditTransactionOrder = await DeleteFeeCredit.create({
   feeCredit: { unitId: feeCreditRecordId, counter: feeCreditRecord.counter },
   version: 1n,
   networkIdentifier: config.networkIdentifier,
-  partitionIdentifier: config.tokenPartitionIdentifier,
+  partitionIdentifier: config.permissionedTokenPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
