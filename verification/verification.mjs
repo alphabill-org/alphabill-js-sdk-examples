@@ -1,7 +1,7 @@
 import { TransferFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/TransferFeeCredit.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
-import { PartitionIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionIdentifier.js';
+import { PartitionTypeIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionTypeIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -25,7 +25,7 @@ const round = (await client.getRoundInfo()).roundNumber;
 
 const transferFeeCreditTransactionOrder = await TransferFeeCredit.create({
   amount: 10n,
-  targetPartitionIdentifier: PartitionIdentifier.MONEY,
+  targetPartitionIdentifier: PartitionTypeIdentifier.MONEY,
   latestAdditionTime: round + 60n,
   feeCreditRecord: { ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey) },
   bill,

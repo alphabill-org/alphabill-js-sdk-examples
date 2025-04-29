@@ -1,6 +1,6 @@
 import { SetFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/SetFeeCredit.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
-import { PartitionIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionIdentifier.js';
+import { PartitionTypeIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionTypeIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -21,7 +21,7 @@ const round = (await client.getRoundInfo()).roundNumber;
 
 const feeCreditAmount = 100n;
 const feeCreditOwnerPredicate = await PayToPublicKeyHashPredicate.create(signingService.publicKey);
-const partitionIdentifier = PartitionIdentifier.TOKEN;
+const partitionTypeIdentifier = PartitionTypeIdentifier.TOKEN;
 
 // if following variables are null, a new fee credit record is created.
 // in order to use existing fee credit record, use these variables.
@@ -34,9 +34,9 @@ if (fcrId == null && fcrCounter == null) {
   console.log(`Using fee credit record with ID ${fcrId}`);
 }
 
-console.log(`Setting ${feeCreditAmount} fee credit to partition ID ${partitionIdentifier}`);
+console.log(`Setting ${feeCreditAmount} fee credit to partition ID ${partitionTypeIdentifier}`);
 const setFeeCreditTransactionOrder = await SetFeeCredit.create({
-  targetPartitionIdentifier: partitionIdentifier,
+  targetPartitionIdentifier: partitionTypeIdentifier,
   ownerPredicate: feeCreditOwnerPredicate,
   amount: feeCreditAmount,
   feeCreditRecord: { unitId: fcrId, counter: fcrCounter },

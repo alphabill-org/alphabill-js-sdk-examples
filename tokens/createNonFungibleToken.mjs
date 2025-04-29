@@ -1,4 +1,5 @@
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
+import { PartitionTypeIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionTypeIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { NonFungibleTokenData } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleTokenData.js';
@@ -32,7 +33,7 @@ const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), TokenParti
 console.log(`Creating non-fungible token of type ${tokenTypeUnitId}`);
 const createNonFungibleTokenTransactionOrder = await CreateNonFungibleToken.create({
   ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
-  type: { unitId: tokenTypeUnitId },
+  typeId: tokenTypeUnitId,
   name: 'My token',
   uri: 'http://guardtime.com',
   data: await NonFungibleTokenData.create(['user variables as primitives', 10000, [true, new Uint8Array()]]),
@@ -40,6 +41,7 @@ const createNonFungibleTokenTransactionOrder = await CreateNonFungibleToken.crea
   nonce: 0n,
   version: 1n,
   networkIdentifier: NetworkIdentifier.LOCAL,
+  partitionIdentifier: PartitionTypeIdentifier.TOKEN,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

@@ -2,7 +2,7 @@ import { AddFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/
 import { TransferFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/TransferFeeCredit.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
-import { PartitionIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionIdentifier.js';
+import { PartitionTypeIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionTypeIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -32,15 +32,15 @@ if (billIds.length === 0) {
 const partitions = [
   {
     client: moneyClient,
-    partitionIdentifier: PartitionIdentifier.MONEY,
+    partitionTypeIdentifier: PartitionTypeIdentifier.MONEY,
   },
   {
     client: tokenClient,
-    partitionIdentifier: PartitionIdentifier.TOKEN,
+    partitionTypeIdentifier: PartitionTypeIdentifier.TOKEN,
   },
 ];
 
-for (const { client, partitionIdentifier } of partitions) {
+for (const { client, partitionTypeIdentifier } of partitions) {
   const bill = await moneyClient.getUnit(billIds[0], false, Bill);
   const round = (await moneyClient.getRoundInfo()).roundNumber;
   const ownerPredicate = await PayToPublicKeyHashPredicate.create(signingService.publicKey);
@@ -58,10 +58,10 @@ for (const { client, partitionIdentifier } of partitions) {
     console.log(`Using fee credit record with ID ${fcrId}`);
   }
 
-  console.log(`Transferring ${feeAmount} fee credit to partition ID ${partitionIdentifier}`);
+  console.log(`Transferring ${feeAmount} fee credit to partition ID ${partitionTypeIdentifier}`);
   const transferFeeCreditTransactionOrder = await TransferFeeCredit.create({
     amount: feeAmount,
-    targetPartitionIdentifier: partitionIdentifier,
+    targetPartitionIdentifier: partitionTypeIdentifier,
     latestAdditionTime: round + 60n,
     feeCreditRecord: { ownerPredicate: ownerPredicate, unitId: fcrId, counter: fcrCounter },
     bill,
@@ -80,9 +80,9 @@ for (const { client, partitionIdentifier } of partitions) {
 
   console.log('----------------------------------------------------------------------------------------');
 
-  console.log(`Adding fee credit to partition ID ${partitionIdentifier}`);
+  console.log(`Adding fee credit to partition ID ${partitionTypeIdentifier}`);
   const addFeeCreditTransactionOrder = await AddFeeCredit.create({
-    targetPartitionIdentifier: partitionIdentifier,
+    targetPartitionIdentifier: partitionTypeIdentifier,
     ownerPredicate: ownerPredicate,
     proof: transferFeeCreditProof,
     feeCreditRecord: { unitId: feeCreditRecordId },
