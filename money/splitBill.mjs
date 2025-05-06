@@ -1,6 +1,5 @@
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { SplitBill } from '@alphabill/alphabill-js-sdk/lib/money/transactions/SplitBill.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -38,7 +37,8 @@ const splitBillTransactionOrder = await SplitBill.create({
   splits: splits,
   bill: bill,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: config.moneyPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

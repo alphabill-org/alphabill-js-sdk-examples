@@ -1,6 +1,4 @@
 import { SetFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/SetFeeCredit.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
-import { PartitionTypeIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionTypeIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -15,13 +13,13 @@ const signingService = new DefaultSigningService(Base16Converter.decode(config.p
 const proofFactory = new PayToPublicKeyHashProofFactory(signingService);
 
 const client = createTokenClient({
-  transport: http(config.tokenPartitionUrl),
+  transport: http(config.permissionedTokenPartitionUrl),
 });
 const round = (await client.getRoundInfo()).roundNumber;
 
 const feeCreditAmount = 100n;
 const feeCreditOwnerPredicate = await PayToPublicKeyHashPredicate.create(signingService.publicKey);
-const partitionTypeIdentifier = PartitionTypeIdentifier.TOKEN;
+const partitionIdentifier = config.permissionedTokenPartitionIdentifier;
 
 // if following variables are null, a new fee credit record is created.
 // in order to use existing fee credit record, use these variables.
@@ -34,14 +32,15 @@ if (fcrId == null && fcrCounter == null) {
   console.log(`Using fee credit record with ID ${fcrId}`);
 }
 
-console.log(`Setting ${feeCreditAmount} fee credit to partition ID ${partitionTypeIdentifier}`);
+console.log(`Setting ${feeCreditAmount} fee credit to partition ID ${partitionIdentifier}`);
 const setFeeCreditTransactionOrder = await SetFeeCredit.create({
-  targetPartitionIdentifier: partitionTypeIdentifier,
+  targetPartitionIdentifier: partitionIdentifier,
   ownerPredicate: feeCreditOwnerPredicate,
   amount: feeCreditAmount,
   feeCreditRecord: { unitId: fcrId, counter: fcrCounter },
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: partitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

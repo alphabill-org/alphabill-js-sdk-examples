@@ -1,7 +1,5 @@
 import { TransferFeeCredit } from '@alphabill/alphabill-js-sdk/lib/fees/transactions/TransferFeeCredit.js';
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
-import { PartitionTypeIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionTypeIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -25,12 +23,13 @@ const round = (await client.getRoundInfo()).roundNumber;
 
 const transferFeeCreditTransactionOrder = await TransferFeeCredit.create({
   amount: 10n,
-  targetPartitionIdentifier: PartitionTypeIdentifier.MONEY,
+  targetPartitionIdentifier: config.moneyPartitionIdentifier,
   latestAdditionTime: round + 60n,
   feeCreditRecord: { ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey) },
   bill,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: config.moneyPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, null, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

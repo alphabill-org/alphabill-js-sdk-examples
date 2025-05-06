@@ -1,5 +1,3 @@
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
-import { PartitionTypeIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionTypeIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { TokenIcon } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenIcon.js';
@@ -27,7 +25,7 @@ const tokenTypeUnitId = new UnitIdWithType(new Uint8Array([1, 2, 3]), TokenParti
 
 console.log(`Creating fungible token type with unit ID ${tokenTypeUnitId}`);
 const createFungibleTokenTypeTransactionOrder = await CreateFungibleTokenType.create({
-  type: { unitId: tokenTypeUnitId },
+  typeId: tokenTypeUnitId,
   symbol: 'E',
   name: 'Big money come',
   icon: new TokenIcon('image/png', new Uint8Array()),
@@ -37,8 +35,8 @@ const createFungibleTokenTypeTransactionOrder = await CreateFungibleTokenType.cr
   tokenMintingPredicate: new AlwaysTruePredicate(),
   tokenTypeOwnerPredicate: new AlwaysTruePredicate(),
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
-  partitionIdentifier: PartitionTypeIdentifier.TOKEN,
+  networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: config.tokenPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

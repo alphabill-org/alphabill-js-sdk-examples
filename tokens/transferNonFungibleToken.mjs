@@ -1,4 +1,3 @@
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { NonFungibleToken } from '@alphabill/alphabill-js-sdk/lib/tokens/NonFungibleToken.js';
@@ -36,7 +35,8 @@ const transferNonFungibleTokenTransactionOrder = await TransferNonFungibleToken.
   ownerPredicate: await PayToPublicKeyHashPredicate.create(signingService.publicKey),
   type: { unitId: token.typeId },
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: config.tokenPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

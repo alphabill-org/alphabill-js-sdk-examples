@@ -1,5 +1,3 @@
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
-import { PartitionTypeIdentifier } from '@alphabill/alphabill-js-sdk/lib/PartitionTypeIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createTokenClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { TokenPartitionUnitType } from '@alphabill/alphabill-js-sdk/lib/tokens/TokenPartitionUnitType.js';
@@ -37,8 +35,8 @@ const createNonFungibleTokenTypeTransactionOrder = await CreateNonFungibleTokenT
   tokenTypeOwnerPredicate: new AlwaysTruePredicate(),
   dataUpdatePredicate: new AlwaysTruePredicate(),
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
-  partitionIdentifier: PartitionTypeIdentifier.TOKEN,
+  networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: config.tokenPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),

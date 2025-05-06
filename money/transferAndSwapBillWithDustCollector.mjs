@@ -1,7 +1,6 @@
 import { Bill } from '@alphabill/alphabill-js-sdk/lib/money/Bill.js';
 import { SwapBillsWithDustCollector } from '@alphabill/alphabill-js-sdk/lib/money/transactions/SwapBillsWithDustCollector.js';
 import { TransferBillToDustCollector } from '@alphabill/alphabill-js-sdk/lib/money/transactions/TransferBillToDustCollector.js';
-import { NetworkIdentifier } from '@alphabill/alphabill-js-sdk/lib/NetworkIdentifier.js';
 import { DefaultSigningService } from '@alphabill/alphabill-js-sdk/lib/signing/DefaultSigningService.js';
 import { createMoneyClient, http } from '@alphabill/alphabill-js-sdk/lib/StateApiClientFactory.js';
 import { ClientMetadata } from '@alphabill/alphabill-js-sdk/lib/transaction/ClientMetadata.js';
@@ -23,11 +22,11 @@ const round = (await client.getRoundInfo()).roundNumber;
 const units = await client.getUnitsByOwnerId(signingService.publicKey);
 const feeCreditRecordId = units.feeCreditRecords.at(0);
 const billUnitIds = units.bills;
-const bill = await client.getUnit(billUnitIds.at(0), false, Bill);
-const targetBill = await client.getUnit(billUnitIds.at(1), false, Bill);
-if (!bill || !targetBill) {
+if (billUnitIds.length < 2) {
   throw new Error('Two bills are needed for the transaction.');
 }
+const bill = await client.getUnit(billUnitIds.at(0), false, Bill);
+const targetBill = await client.getUnit(billUnitIds.at(1), false, Bill);
 
 console.log(
   `Transferring bill with ID ${bill.unitId} to dust collector with target bill's ID set to ${targetBill.unitId}`,
@@ -37,7 +36,8 @@ const transferBillToDustCollectorTransactionOrder = await TransferBillToDustColl
   bill: bill,
   targetBill: targetBill,
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: config.moneyPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
@@ -58,7 +58,8 @@ const swapBillWithDustCollectorTransactionOrder = await SwapBillsWithDustCollect
   bill: targetBill,
   proofs: [transferBillToDustCollectorProof],
   version: 1n,
-  networkIdentifier: NetworkIdentifier.LOCAL,
+  networkIdentifier: config.networkIdentifier,
+  partitionIdentifier: config.moneyPartitionIdentifier,
   stateLock: null,
   metadata: new ClientMetadata(round + 60n, 5n, feeCreditRecordId, new Uint8Array()),
   stateUnlock: new AlwaysTruePredicate(),
