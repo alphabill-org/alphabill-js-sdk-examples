@@ -8,15 +8,13 @@
     "lint:fix": "eslint \"./**/*.mjs\" --fix"
   },
   "dependencies": {
-    "@alphabill/alphabill-js-sdk": "1.0.0-b13f7ce-rc.661b72e"
+    "@alphabill/alphabill-js-sdk": "1.0.0-rc2-rc.d20dc37"
   },
   "devDependencies": {
-    "@eslint/js": "9.25.0",
-    "eslint": "9.25.0",
-    "eslint-config-prettier": "10.1.2",
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-config-standard": "17.1.0",
     "eslint-plugin-import": "2.31.0",
-    "eslint-plugin-prettier": "5.2.6",
-    "globals": "16.0.0",
-    "prettier": "3.5.3"
+    "eslint-plugin-prettier": "5.2.1"
   }
 }
